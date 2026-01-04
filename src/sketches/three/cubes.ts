@@ -1,14 +1,16 @@
 import * as THREE from 'three';
-import { Generation, GenerationFactory, ControlDefinition } from '../../types/generation';
+import { Sketch, SketchFactory, ControlDefinition, ControlValue } from '../../types/sketch';
 
-class CubesGeneration implements Generation {
+class CubesSketch implements Sketch {
   id = 'cubes';
   name = 'Rotating Cubes';
   type: 'sketch' = 'sketch';
 
   controls: ControlDefinition[] = [
-    { name: 'rotationSpeed', type: 'number', label: 'Rotation Speed', defaultValue: 1.0, min: 0.1, max: 5.0, step: 0.1 },
-    { name: 'cubeCount', type: 'number', label: 'Cube Count', defaultValue: 5, min: 1, max: 20, step: 1 },
+    { name: 'rotationSpeed', type: 'float', label: 'Rotation Speed', defaultValue: 1.0, min: 0.1, max: 5.0, step: 0.1 },
+    { name: 'cubeCount', type: 'integer', label: 'Cube Count', defaultValue: 5, min: 1, max: 20 },
+    { name: 'cubeSize', type: 'float', label: 'Cube Size', defaultValue: 1.0, min: 0.2, max: 3.0, step: 0.1 },
+    { name: 'randomize', type: 'trigger', label: 'Randomize Colors' },
   ];
 
   private canvas!: HTMLCanvasElement;
@@ -19,11 +21,14 @@ class CubesGeneration implements Generation {
 
   private rotationSpeed = 1.0;
   private cubeCount = 5;
+  private cubeSize = 1.0;
+  private shouldRandomize = false;
+  private colors = [0xff6b6b, 0x4ecdc4, 0x45b7d1, 0x96ceb4, 0xffeaa7];
 
   async init(canvas: HTMLCanvasElement): Promise<void> {
     this.canvas = canvas;
 
-    this.renderer = new THREE.WebGLRenderer({ canvas, alpha: true, antialias: true });
+    this.renderer = new THREE.WebGLRenderer({ canvas, alpha: true, antialias: true, preserveDrawingBuffer: true });
     this.renderer.setSize(canvas.width, canvas.height);
     this.renderer.setClearColor(0x000000, 0);
 
@@ -53,12 +58,11 @@ class CubesGeneration implements Generation {
     this.cubes = [];
 
     // Create new cubes
-    const geometry = new THREE.BoxGeometry(1, 1, 1);
-    const colors = [0xff6b6b, 0x4ecdc4, 0x45b7d1, 0x96ceb4, 0xffeaa7];
+    const geometry = new THREE.BoxGeometry(this.cubeSize, this.cubeSize, this.cubeSize);
 
     for (let i = 0; i < this.cubeCount; i++) {
       const material = new THREE.MeshPhongMaterial({
-        color: colors[i % colors.length],
+        color: this.colors[i % this.colors.length],
         shininess: 100,
       });
       const cube = new THREE.Mesh(geometry, material);
@@ -74,7 +78,24 @@ class CubesGeneration implements Generation {
     }
   }
 
+  private randomizeColors(): void {
+    this.colors = this.colors.map(() =>
+      Math.floor(Math.random() * 0xffffff)
+    );
+    // Update existing cubes
+    for (let i = 0; i < this.cubes.length; i++) {
+      const material = this.cubes[i].material as THREE.MeshPhongMaterial;
+      material.color.setHex(this.colors[i % this.colors.length]);
+    }
+  }
+
   render(time: number): void {
+    // Handle trigger - randomize colors if triggered
+    if (this.shouldRandomize) {
+      this.randomizeColors();
+      this.shouldRandomize = false;
+    }
+
     // Update canvas size if needed
     if (this.renderer.domElement.width !== this.canvas.width ||
         this.renderer.domElement.height !== this.canvas.height) {
@@ -108,7 +129,7 @@ class CubesGeneration implements Generation {
     this.renderer.dispose();
   }
 
-  setControl(name: string, value: number | boolean | string): void {
+  setControl(name: string, value: ControlValue): void {
     if (name === 'rotationSpeed' && typeof value === 'number') {
       this.rotationSpeed = value;
     } else if (name === 'cubeCount' && typeof value === 'number') {
@@ -117,19 +138,28 @@ class CubesGeneration implements Generation {
         this.cubeCount = newCount;
         this.createCubes();
       }
+    } else if (name === 'cubeSize' && typeof value === 'number') {
+      if (value !== this.cubeSize) {
+        this.cubeSize = value;
+        this.createCubes();
+      }
+    } else if (name === 'randomize' && value === true) {
+      this.shouldRandomize = true;
     }
   }
 
-  getControl(name: string): number | undefined {
+  getControl(name: string): ControlValue | undefined {
     if (name === 'rotationSpeed') return this.rotationSpeed;
     if (name === 'cubeCount') return this.cubeCount;
+    if (name === 'cubeSize') return this.cubeSize;
+    if (name === 'randomize') return false; // Triggers always return false
     return undefined;
   }
 }
 
-export const cubesFactory: GenerationFactory = {
+export const cubesFactory: SketchFactory = {
   id: 'cubes',
   name: 'Rotating Cubes',
   type: 'sketch',
-  create: () => new CubesGeneration(),
+  create: () => new CubesSketch(),
 };

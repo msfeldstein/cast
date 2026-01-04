@@ -1,4 +1,4 @@
-import { Generation, GenerationFactory, ControlDefinition } from '../../types/generation';
+import { Sketch, SketchFactory, ControlDefinition, ControlValue } from '../../types/sketch';
 
 const VERTEX_SHADER = `#version 300 es
 in vec2 a_position;
@@ -18,6 +18,7 @@ out vec4 fragColor;
 
 uniform float u_time;
 uniform float u_speed;
+uniform float u_saturation;
 
 vec3 hsv2rgb(vec3 c) {
   vec4 K = vec4(1.0, 2.0 / 3.0, 1.0 / 3.0, 3.0);
@@ -27,18 +28,19 @@ vec3 hsv2rgb(vec3 c) {
 
 void main() {
   float hue = fract(v_uv.x + v_uv.y * 0.5 + u_time * u_speed * 0.1);
-  vec3 color = hsv2rgb(vec3(hue, 0.8, 0.9));
+  vec3 color = hsv2rgb(vec3(hue, u_saturation, 0.9));
   fragColor = vec4(color, 1.0);
 }
 `;
 
-class GradientGeneration implements Generation {
+class GradientSketch implements Sketch {
   id = 'gradient';
   name = 'Rainbow Gradient';
   type: 'shader' = 'shader';
 
   controls: ControlDefinition[] = [
-    { name: 'speed', type: 'number', label: 'Speed', defaultValue: 1.0, min: 0.0, max: 5.0, step: 0.1 },
+    { name: 'speed', type: 'float', label: 'Speed', defaultValue: 1.0, min: 0.0, max: 5.0, step: 0.1 },
+    { name: 'saturation', type: 'float', label: 'Saturation', defaultValue: 0.8, min: 0.0, max: 1.0 },
   ];
 
   private canvas!: HTMLCanvasElement;
@@ -48,13 +50,15 @@ class GradientGeneration implements Generation {
   private uniforms!: {
     time: WebGLUniformLocation;
     speed: WebGLUniformLocation;
+    saturation: WebGLUniformLocation;
   };
 
   private speed = 1.0;
+  private saturation = 0.8;
 
   async init(canvas: HTMLCanvasElement): Promise<void> {
     this.canvas = canvas;
-    const gl = canvas.getContext('webgl2');
+    const gl = canvas.getContext('webgl2', { preserveDrawingBuffer: true });
     if (!gl) throw new Error('WebGL2 not supported');
     this.gl = gl;
 
@@ -77,6 +81,7 @@ class GradientGeneration implements Generation {
     this.uniforms = {
       time: gl.getUniformLocation(this.program, 'u_time')!,
       speed: gl.getUniformLocation(this.program, 'u_speed')!,
+      saturation: gl.getUniformLocation(this.program, 'u_saturation')!,
     };
 
     this.vao = gl.createVertexArray()!;
@@ -102,6 +107,7 @@ class GradientGeneration implements Generation {
 
     gl.uniform1f(this.uniforms.time, time);
     gl.uniform1f(this.uniforms.speed, this.speed);
+    gl.uniform1f(this.uniforms.saturation, this.saturation);
 
     gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
   }
@@ -111,21 +117,24 @@ class GradientGeneration implements Generation {
     this.gl.deleteVertexArray(this.vao);
   }
 
-  setControl(name: string, value: number | boolean | string): void {
+  setControl(name: string, value: ControlValue): void {
     if (name === 'speed' && typeof value === 'number') {
       this.speed = value;
+    } else if (name === 'saturation' && typeof value === 'number') {
+      this.saturation = value;
     }
   }
 
-  getControl(name: string): number | undefined {
+  getControl(name: string): ControlValue | undefined {
     if (name === 'speed') return this.speed;
+    if (name === 'saturation') return this.saturation;
     return undefined;
   }
 }
 
-export const gradientFactory: GenerationFactory = {
+export const gradientFactory: SketchFactory = {
   id: 'gradient',
   name: 'Rainbow Gradient',
   type: 'shader',
-  create: () => new GradientGeneration(),
+  create: () => new GradientSketch(),
 };

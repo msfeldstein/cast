@@ -1,4 +1,21 @@
-import { Generation, GenerationFactory, ControlDefinition } from '../../types/generation';
+import { Sketch, SketchFactory, ControlDefinition, ControlValue } from '../../types/sketch';
+
+// Helper to convert hex color to RGB array
+function hexToRgb(hex: string): [number, number, number] {
+  const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
+  return result
+    ? [
+        parseInt(result[1], 16) / 255,
+        parseInt(result[2], 16) / 255,
+        parseInt(result[3], 16) / 255,
+      ]
+    : [0, 0, 0];
+}
+
+function rgbToHex(r: number, g: number, b: number): string {
+  const toHex = (c: number) => Math.round(c * 255).toString(16).padStart(2, '0');
+  return `#${toHex(r)}${toHex(g)}${toHex(b)}`;
+}
 
 const VERTEX_SHADER = `#version 300 es
 in vec2 a_position;
@@ -39,14 +56,16 @@ void main() {
 }
 `;
 
-class PlasmaGeneration implements Generation {
+class PlasmaSketch implements Sketch {
   id = 'plasma';
   name = 'Plasma';
   type: 'shader' = 'shader';
 
   controls: ControlDefinition[] = [
-    { name: 'speed', type: 'number', label: 'Speed', defaultValue: 1.0, min: 0.1, max: 5.0, step: 0.1 },
-    { name: 'scale', type: 'number', label: 'Scale', defaultValue: 4.0, min: 1.0, max: 20.0, step: 0.5 },
+    { name: 'speed', type: 'float', label: 'Speed', defaultValue: 1.0, min: 0.1, max: 5.0, step: 0.1 },
+    { name: 'scale', type: 'float', label: 'Scale', defaultValue: 4.0, min: 1.0, max: 20.0, step: 0.5 },
+    { name: 'color1', type: 'color', label: 'Color 1', defaultValue: '#1a4dcc' },
+    { name: 'color2', type: 'color', label: 'Color 2', defaultValue: '#e63380' },
   ];
 
   private canvas!: HTMLCanvasElement;
@@ -63,12 +82,12 @@ class PlasmaGeneration implements Generation {
 
   private speed = 1.0;
   private scale = 4.0;
-  private color1 = [0.1, 0.3, 0.8];
-  private color2 = [0.9, 0.2, 0.5];
+  private color1: [number, number, number] = [0.1, 0.3, 0.8];
+  private color2: [number, number, number] = [0.9, 0.2, 0.5];
 
   async init(canvas: HTMLCanvasElement): Promise<void> {
     this.canvas = canvas;
-    const gl = canvas.getContext('webgl2');
+    const gl = canvas.getContext('webgl2', { preserveDrawingBuffer: true });
     if (!gl) throw new Error('WebGL2 not supported');
     this.gl = gl;
 
@@ -133,24 +152,30 @@ class PlasmaGeneration implements Generation {
     this.gl.deleteVertexArray(this.vao);
   }
 
-  setControl(name: string, value: number | boolean | string): void {
+  setControl(name: string, value: ControlValue): void {
     if (name === 'speed' && typeof value === 'number') {
       this.speed = value;
     } else if (name === 'scale' && typeof value === 'number') {
       this.scale = value;
+    } else if (name === 'color1' && typeof value === 'string') {
+      this.color1 = hexToRgb(value);
+    } else if (name === 'color2' && typeof value === 'string') {
+      this.color2 = hexToRgb(value);
     }
   }
 
-  getControl(name: string): number | undefined {
+  getControl(name: string): ControlValue | undefined {
     if (name === 'speed') return this.speed;
     if (name === 'scale') return this.scale;
+    if (name === 'color1') return rgbToHex(...this.color1);
+    if (name === 'color2') return rgbToHex(...this.color2);
     return undefined;
   }
 }
 
-export const plasmaFactory: GenerationFactory = {
+export const plasmaFactory: SketchFactory = {
   id: 'plasma',
   name: 'Plasma',
   type: 'shader',
-  create: () => new PlasmaGeneration(),
+  create: () => new PlasmaSketch(),
 };

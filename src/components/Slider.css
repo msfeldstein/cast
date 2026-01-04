@@ -1,0 +1,72 @@
+.slider {
+  position: relative;
+  height: 36px;
+  min-height: 36px;
+  flex-shrink: 0;
+  background: #2a2a2a;
+  border-radius: 4px;
+  cursor: ew-resize;
+  user-select: none;
+  overflow: hidden;
+}
+
+.slider:hover {
+  background: #333;
+}
+
+.slider.dragging {
+  background: #333;
+}
+
+.slider-fill {
+  position: absolute;
+  top: 0;
+  left: 0;
+  height: 100%;
+  background: linear-gradient(to right, #4a9eff, #3a7acc);
+  pointer-events: none;
+  transition: width 0.05s ease-out;
+}
+
+.slider.dragging .slider-fill {
+  transition: none;
+}
+
+.slider-label {
+  position: absolute;
+  top: 4px;
+  left: 8px;
+  font-size: 10px;
+  color: rgba(255, 255, 255, 0.7);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  pointer-events: none;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5);
+}
+
+.slider-value {
+  position: absolute;
+  bottom: 4px;
+  left: 8px;
+  font-size: 14px;
+  font-weight: 600;
+  color: #fff;
+  pointer-events: none;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5);
+}
+
+/* Bound to signal styles */
+.slider.bound {
+  cursor: not-allowed;
+}
+
+.slider.bound .slider-fill {
+  background: linear-gradient(to right, #9b59b6, #8e44ad);
+}
+
+.slider-binding-indicator {
+  font-size: 9px;
+  color: #9b59b6;
+  font-weight: normal;
+  text-transform: none;
+}

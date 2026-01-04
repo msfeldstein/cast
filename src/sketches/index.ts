@@ -1,10 +1,10 @@
-import { GenerationFactory } from '../types/generation';
+import { SketchFactory } from '../types/sketch';
 import { plasmaFactory } from './shaders/plasma';
 import { gradientFactory } from './shaders/gradient';
-import { cubesFactory } from './sketches/cubes';
+import { cubesFactory } from './three/cubes';
 
-// All available generations
-export const generations: GenerationFactory[] = [
+// All available sketches
+export const sketches: SketchFactory[] = [
   plasmaFactory,
   gradientFactory,
   cubesFactory,

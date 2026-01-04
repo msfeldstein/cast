@@ -1,25 +1,25 @@
-import { GenerationFactory } from '../types/generation';
+import { SketchFactory } from '../types/sketch';
 
 const THUMBNAIL_WIDTH = 80;
 const THUMBNAIL_HEIGHT = 45;
 
-export async function generateThumbnail(factory: GenerationFactory): Promise<string> {
+export async function generateThumbnail(factory: SketchFactory): Promise<string> {
   const canvas = document.createElement('canvas');
   canvas.width = THUMBNAIL_WIDTH;
   canvas.height = THUMBNAIL_HEIGHT;
 
   try {
-    const generation = factory.create();
-    await generation.init(canvas);
+    const sketch = factory.create();
+    await sketch.init(canvas);
 
     // Render a single frame at t=0.5s to get something interesting
-    generation.render(0.5, 0.016);
+    sketch.render(0.5, 0.016);
 
     // Get the data URL
     const dataUrl = canvas.toDataURL('image/png');
 
     // Clean up
-    generation.dispose();
+    sketch.dispose();
 
     return dataUrl;
   } catch (error) {
@@ -39,7 +39,7 @@ export async function generateThumbnail(factory: GenerationFactory): Promise<str
 }
 
 export async function generateAllThumbnails(
-  factories: GenerationFactory[]
+  factories: SketchFactory[]
 ): Promise<Map<string, string>> {
   const thumbnails = new Map<string, string>();
 

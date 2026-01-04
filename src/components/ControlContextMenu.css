@@ -1,0 +1,84 @@
+.control-context-menu {
+  background: #2a2a2a;
+  border: 1px solid #444;
+  border-radius: 4px;
+  min-width: 180px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+  overflow: hidden;
+  font-size: 12px;
+}
+
+.menu-label {
+  padding: 6px 12px;
+  font-size: 10px;
+  color: #888;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.menu-item {
+  padding: 8px 12px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: #e0e0e0;
+}
+
+.menu-item:hover {
+  background: #3a3a3a;
+}
+
+.menu-item.active {
+  background: #3a3a3a;
+}
+
+.menu-item.unbind {
+  color: #e74c3c;
+}
+
+.menu-item.unbind:hover {
+  background: rgba(231, 76, 60, 0.2);
+}
+
+.menu-divider {
+  height: 1px;
+  background: #444;
+  margin: 4px 0;
+}
+
+.menu-empty {
+  padding: 12px;
+  color: #888;
+  font-size: 11px;
+  text-align: center;
+}
+
+.signal-badge {
+  width: 18px;
+  height: 18px;
+  border-radius: 3px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 10px;
+  font-weight: 600;
+  color: #fff;
+  flex-shrink: 0;
+}
+
+.signal-badge.type-lfo {
+  background: #9b59b6;
+}
+
+.signal-badge.type-microphone {
+  background: #e74c3c;
+}
+
+.signal-badge.type-beat {
+  background: #f39c12;
+}
+
+.signal-badge.type-midi {
+  background: #3498db;
+}

@@ -1,0 +1,316 @@
+.signals-panel {
+  background: #1e1e1e;
+  padding: 8px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  height: 100%;
+  overflow: hidden;
+}
+
+.signals-header {
+  flex-shrink: 0;
+}
+
+.add-signal-buttons {
+  display: flex;
+  gap: 4px;
+  flex-wrap: wrap;
+}
+
+.add-signal-buttons button {
+  background: #333;
+  border: 1px solid #444;
+  color: #aaa;
+  padding: 6px 10px;
+  border-radius: 3px;
+  font-size: 11px;
+  cursor: pointer;
+  transition: background 0.1s, color 0.1s;
+}
+
+.add-signal-buttons button:hover {
+  background: #4a9eff;
+  color: #fff;
+  border-color: #4a9eff;
+}
+
+.signals-list {
+  flex: 1;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.signals-list::-webkit-scrollbar {
+  width: 6px;
+}
+
+.signals-list::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.signals-list::-webkit-scrollbar-thumb {
+  background: #444;
+  border-radius: 3px;
+}
+
+.signals-empty {
+  color: #666;
+  font-size: 12px;
+  text-align: center;
+  padding: 20px;
+}
+
+.signal-item {
+  background: #2a2a2a;
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+.signal-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px;
+  cursor: pointer;
+}
+
+.signal-header:hover {
+  background: #333;
+}
+
+.signal-info {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  min-width: 0;
+}
+
+.signal-type-badge {
+  font-size: 9px;
+  font-weight: 600;
+  padding: 2px 5px;
+  border-radius: 2px;
+  background: #555;
+  color: #fff;
+  flex-shrink: 0;
+}
+
+.signal-type-lfo .signal-type-badge {
+  background: #9b59b6;
+}
+
+.signal-type-microphone .signal-type-badge {
+  background: #e74c3c;
+}
+
+.signal-type-beat .signal-type-badge {
+  background: #f39c12;
+}
+
+.signal-type-midi .signal-type-badge {
+  background: #3498db;
+}
+
+.signal-name {
+  font-size: 12px;
+  color: #e0e0e0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.signal-binding-count {
+  font-size: 10px;
+  color: #888;
+  background: #333;
+  padding: 2px 6px;
+  border-radius: 10px;
+  flex-shrink: 0;
+}
+
+.signal-value-bar {
+  flex: 1;
+  height: 8px;
+  background: #1a1a1a;
+  border-radius: 4px;
+  overflow: hidden;
+  min-width: 40px;
+}
+
+.signal-value-fill {
+  height: 100%;
+  background: #4a9eff;
+  transition: width 0.05s ease-out;
+}
+
+.signal-type-lfo .signal-value-fill {
+  background: #9b59b6;
+}
+
+.signal-type-microphone .signal-value-fill {
+  background: #e74c3c;
+}
+
+.signal-type-beat .signal-value-fill {
+  background: #f39c12;
+}
+
+.signal-type-midi .signal-value-fill {
+  background: #3498db;
+}
+
+.signal-remove {
+  background: transparent;
+  border: none;
+  color: #666;
+  font-size: 14px;
+  cursor: pointer;
+  padding: 4px 8px;
+  border-radius: 3px;
+  line-height: 1;
+}
+
+.signal-remove:hover {
+  background: #e74c3c;
+  color: #fff;
+}
+
+.signal-config {
+  padding: 8px;
+  border-top: 1px solid #333;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.config-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  font-size: 12px;
+}
+
+.config-row label {
+  color: #aaa;
+}
+
+.config-row select {
+  background: #333;
+  color: #e0e0e0;
+  border: 1px solid #444;
+  border-radius: 3px;
+  padding: 4px 8px;
+  font-size: 11px;
+  cursor: pointer;
+}
+
+.config-row select:hover {
+  background: #3a3a3a;
+}
+
+.config-row.checkbox label {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  cursor: pointer;
+}
+
+.config-row.checkbox input[type="checkbox"] {
+  cursor: pointer;
+}
+
+/* MIDI Learn UI */
+.midi-learn-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 0;
+}
+
+.midi-learn-btn {
+  background: #3498db;
+  border: none;
+  color: #fff;
+  padding: 10px 20px;
+  border-radius: 4px;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+
+.midi-learn-btn:hover {
+  background: #2980b9;
+}
+
+.midi-learn-hint {
+  font-size: 10px;
+  color: #888;
+}
+
+.midi-learn-message {
+  font-size: 12px;
+  color: #3498db;
+  animation: pulse 1.5s ease-in-out infinite;
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.5; }
+}
+
+.midi-cancel-btn {
+  background: #444;
+  border: none;
+  color: #aaa;
+  padding: 6px 12px;
+  border-radius: 3px;
+  font-size: 11px;
+  cursor: pointer;
+}
+
+.midi-cancel-btn:hover {
+  background: #555;
+  color: #fff;
+}
+
+.midi-learned-info {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 6px 0;
+  font-size: 12px;
+}
+
+.midi-learned-label {
+  color: #3498db;
+  font-weight: 600;
+}
+
+.midi-learned-channel {
+  color: #888;
+  font-size: 10px;
+}
+
+.midi-relearn-btn {
+  background: #333;
+  border: 1px solid #444;
+  color: #aaa;
+  padding: 6px 12px;
+  border-radius: 3px;
+  font-size: 11px;
+  cursor: pointer;
+  width: 100%;
+  margin-top: 4px;
+}
+
+.midi-relearn-btn:hover {
+  background: #3a3a3a;
+  color: #fff;
+  border-color: #555;
+}

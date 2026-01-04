@@ -206,7 +206,7 @@ export class Compositor {
 
   composite(layers: Layer[]): void {
     const gl = this.gl;
-    const visibleLayers = layers.filter(l => l.visible && l.generation);
+    const visibleLayers = layers.filter(l => l.visible && l.sketch);
 
     if (visibleLayers.length === 0) {
       gl.clearColor(0, 0, 0, 1);
