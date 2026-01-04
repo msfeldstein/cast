@@ -178,7 +178,9 @@ export class MIDISignal implements MIDISignalType {
   }
 
   setConfig(config: Partial<MIDIConfig>): void {
-    this.config = { ...this.config, ...config };
+    // Only apply config properties that match this signal type
+    const { type, ...rest } = config;
+    this.config = { ...this.config, ...rest } as MIDIConfig;
     // Reset value when config changes
     this.currentValue = 0;
     this.activeNotes.clear();

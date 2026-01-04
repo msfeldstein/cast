@@ -13,12 +13,14 @@ import {
   PersistedSignal,
   PersistedBinding,
   SimpleLayoutConfig,
+  TreeLayoutNode,
   DEFAULT_STATE,
 } from './types';
 import { signalManager } from '../signals';
 
 class AppStateManager {
   private simpleLayout: SimpleLayoutConfig | null = null;
+  private treeLayout: TreeLayoutNode | null = null;
   private initialized = false;
 
   /**
@@ -32,6 +34,7 @@ class AppStateManager {
     await this.hydrateSignals(state.signals);
     this.hydrateBindings(state.bindings);
     this.simpleLayout = state.simpleLayout || null;
+    this.treeLayout = state.treeLayout || null;
     this.initialized = true;
 
     // Subscribe to signal changes to auto-save
@@ -50,6 +53,21 @@ class AppStateManager {
    */
   saveSimpleLayout(layout: SimpleLayoutConfig): void {
     this.simpleLayout = layout;
+    this.saveState();
+  }
+
+  /**
+   * Get the tree layout configuration
+   */
+  getTreeLayout(): TreeLayoutNode | null {
+    return this.treeLayout;
+  }
+
+  /**
+   * Save the tree layout configuration
+   */
+  saveTreeLayout(layout: TreeLayoutNode): void {
+    this.treeLayout = layout;
     this.saveState();
   }
 
@@ -87,6 +105,7 @@ class AppStateManager {
       bindings: this.serializeBindings(),
       layout: null, // Legacy field, no longer used
       simpleLayout: this.simpleLayout,
+      treeLayout: this.treeLayout,
     };
   }
 

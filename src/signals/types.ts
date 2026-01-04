@@ -14,31 +14,31 @@ export interface BaseSignal {
   // Lifecycle
   init(): Promise<void>;
   dispose(): void;
+
+  // Configuration - accepts any config, returns specific config via discriminated union
+  getConfig(): SignalConfig;
+  setConfig(config: Partial<SignalConfig>): void;
 }
 
 // Specific signal interfaces for discriminated union
 export interface LFOSignal extends BaseSignal {
   type: 'lfo';
   getConfig(): LFOConfig;
-  setConfig(config: Partial<LFOConfig>): void;
 }
 
 export interface MicrophoneSignal extends BaseSignal {
   type: 'microphone';
   getConfig(): MicrophoneConfig;
-  setConfig(config: Partial<MicrophoneConfig>): void;
 }
 
 export interface BeatSignal extends BaseSignal {
   type: 'beat';
   getConfig(): BeatConfig;
-  setConfig(config: Partial<BeatConfig>): void;
 }
 
 export interface MIDISignalType extends BaseSignal {
   type: 'midi';
   getConfig(): MIDIConfig;
-  setConfig(config: Partial<MIDIConfig>): void;
   isLearned(): boolean;
   setLearned(learned: boolean): void;
   isListening(): boolean;
@@ -50,7 +50,6 @@ export interface MIDISignalType extends BaseSignal {
 export interface GamepadSignalType extends BaseSignal {
   type: 'gamepad';
   getConfig(): GamepadConfig;
-  setConfig(config: Partial<GamepadConfig>): void;
   isLearned(): boolean;
   setLearned(learned: boolean): void;
   isListening(): boolean;

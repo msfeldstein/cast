@@ -27,13 +27,37 @@ export interface PersistedBinding {
   signalId: string;
 }
 
-// Simple layout config (used by new vanilla JS UI)
+// Simple layout config (legacy - used by old PanelManager)
 export interface SimpleLayoutConfig {
   /** Main horizontal split position as percentage (0-100) */
   mainSplit: number;
   /** Right column splits as percentages [layer1, layer2, bottom] */
   rightSplits: [number, number, number];
 }
+
+// Tree layout config (used by new WindowManager)
+export interface TreeTabConfig {
+  id: string;
+  title: string;
+}
+
+export interface TreePanelNode {
+  type: 'panel';
+  id: string;
+  tabs: TreeTabConfig[];
+  activeTabId: string;
+}
+
+export interface TreeSplitNode {
+  type: 'split';
+  id: string;
+  direction: 'horizontal' | 'vertical';
+  ratio: number;
+  first: TreeLayoutNode;
+  second: TreeLayoutNode;
+}
+
+export type TreeLayoutNode = TreeSplitNode | TreePanelNode;
 
 // Legacy: Serializable layout (rc-dock compatible structure without React elements)
 // Kept for potential migration from old format
@@ -64,8 +88,10 @@ export interface PersistedState {
   signals: PersistedSignal[];
   bindings: PersistedBinding[];
   layout: PersistedLayout | null;
-  /** New simple layout format */
+  /** Legacy simple layout format */
   simpleLayout?: SimpleLayoutConfig | null;
+  /** New tree-based layout format */
+  treeLayout?: TreeLayoutNode | null;
 }
 
 // Default empty state

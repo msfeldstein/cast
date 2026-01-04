@@ -89,7 +89,9 @@ export class MicrophoneSignal implements IMicrophoneSignal {
   }
 
   setConfig(config: Partial<MicrophoneConfig>): void {
-    this.config = { ...this.config, ...config };
+    // Only apply config properties that match this signal type
+    const { type, ...rest } = config;
+    this.config = { ...this.config, ...rest } as MicrophoneConfig;
   }
 
   dispose(): void {

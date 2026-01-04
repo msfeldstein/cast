@@ -6,7 +6,8 @@ import { RenderLoop } from './core/RenderLoop';
 import { sketches } from './sketches';
 import { signalManager } from './signals';
 import { appStateManager } from './persistence';
-import { PanelManager, LayoutConfig } from './layout/PanelManager';
+import { WindowManager } from './layout/WindowManager';
+import { createDefaultLayout, LayoutNode } from './layout/types';
 import { MainOutput } from './components/MainOutput';
 import { LayerPanel } from './components/LayerPanel';
 import { Library } from './components/Library';
@@ -22,7 +23,7 @@ export class App {
   private container: HTMLElement;
   private compositor: Compositor | null = null;
   private renderLoop: RenderLoop | null = null;
-  private panelManager: PanelManager | null = null;
+  private windowManager: WindowManager | null = null;
   private layers: Layer[];
 
   constructor(container: HTMLElement) {
@@ -49,18 +50,15 @@ export class App {
     this.container.innerHTML = '';
 
     // Get saved layout or use default
-    const savedLayout = appStateManager.getSimpleLayout();
-    const layoutConfig: LayoutConfig = savedLayout || {
-      mainSplit: 60,
-      rightSplits: [35, 35, 30],
-    };
+    const savedLayout = appStateManager.getTreeLayout();
+    const layoutConfig: LayoutNode = savedLayout || createDefaultLayout();
 
-    // Create panel manager
-    this.panelManager = new PanelManager(this.container, layoutConfig);
+    // Create window manager
+    this.windowManager = new WindowManager(this.container, layoutConfig);
 
     // Subscribe to layout changes for persistence
-    this.panelManager.on('layout:change', (layout) => {
-      appStateManager.saveSimpleLayout(layout);
+    this.windowManager.on('layout:change', (layout) => {
+      appStateManager.saveTreeLayout(layout);
     });
 
     // Register content factories for each panel/tab
@@ -68,10 +66,10 @@ export class App {
   }
 
   private registerPanelContent(): void {
-    if (!this.panelManager) return;
+    if (!this.windowManager) return;
 
     // Output panel
-    this.panelManager.registerContent('output', () => {
+    this.windowManager.registerContent('output', () => {
       return new MainOutput({
         onCanvasReady: (canvas) => this.initCompositor(canvas),
         onCanvasResize: (width, height) => {
@@ -81,7 +79,7 @@ export class App {
     });
 
     // Layer 1 panel
-    this.panelManager.registerContent('layer-1', () => {
+    this.windowManager.registerContent('layer-1', () => {
       return new LayerPanel({
         layer: this.layers[0],
         renderLoop: this.renderLoop!,
@@ -90,7 +88,7 @@ export class App {
     });
 
     // Layer 2 panel
-    this.panelManager.registerContent('layer-2', () => {
+    this.windowManager.registerContent('layer-2', () => {
       return new LayerPanel({
         layer: this.layers[1],
         renderLoop: this.renderLoop!,
@@ -99,7 +97,7 @@ export class App {
     });
 
     // Library tab
-    this.panelManager.registerContent('library', () => {
+    this.windowManager.registerContent('library', () => {
       return new Library({
         sketches,
         onSelectSketch: (factory) => {
@@ -110,7 +108,7 @@ export class App {
     });
 
     // Signals tab
-    this.panelManager.registerContent('signals', () => {
+    this.windowManager.registerContent('signals', () => {
       return new SignalsPanel({
         renderLoop: this.renderLoop!,
       });
@@ -194,10 +192,10 @@ export class App {
       this.compositor = null;
     }
 
-    // Dispose panel manager
-    if (this.panelManager) {
-      this.panelManager.dispose();
-      this.panelManager = null;
+    // Dispose window manager
+    if (this.windowManager) {
+      this.windowManager.dispose();
+      this.windowManager = null;
     }
 
     // Dispose layers

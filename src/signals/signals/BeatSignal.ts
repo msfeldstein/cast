@@ -98,7 +98,9 @@ export class BeatSignal implements IBeatSignal {
   }
 
   setConfig(config: Partial<BeatConfig>): void {
-    this.config = { ...this.config, ...config };
+    // Only apply config properties that match this signal type
+    const { type, ...rest } = config;
+    this.config = { ...this.config, ...rest } as BeatConfig;
   }
 
   dispose(): void {
