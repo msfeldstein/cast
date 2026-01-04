@@ -9,11 +9,13 @@ import {
   MicrophoneConfig,
   BeatConfig,
   MIDIConfig,
+  GamepadConfig,
 } from './types';
 import { LFOSignal } from './signals/LFOSignal';
 import { MicrophoneSignal } from './signals/MicrophoneSignal';
 import { BeatSignal } from './signals/BeatSignal';
 import { MIDISignal } from './signals/MIDISignal';
+import { GamepadSignal } from './signals/GamepadSignal';
 
 export interface SignalManagerEvents {
   [key: string]: unknown;
@@ -37,6 +39,7 @@ export class SignalManager extends EventEmitter<SignalManagerEvents> {
     this.nextId.set('microphone', 1);
     this.nextId.set('beat', 1);
     this.nextId.set('midi', 1);
+    this.nextId.set('gamepad', 1);
   }
 
   // ===== Signal Management =====
@@ -84,6 +87,9 @@ export class SignalManager extends EventEmitter<SignalManagerEvents> {
         break;
       case 'midi':
         signal = new MIDISignal(id, config as Partial<MIDIConfig>);
+        break;
+      case 'gamepad':
+        signal = new GamepadSignal(id, config as Partial<GamepadConfig>);
         break;
       default:
         throw new Error(`Unknown signal type: ${type}`);

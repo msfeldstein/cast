@@ -1,4 +1,4 @@
-import { Signal, BeatConfig } from '../types';
+import { BeatSignal as IBeatSignal, BeatConfig } from '../types';
 
 const DEFAULT_CONFIG: BeatConfig = {
   type: 'beat',
@@ -7,7 +7,7 @@ const DEFAULT_CONFIG: BeatConfig = {
   minInterval: 100,
 };
 
-export class BeatSignal implements Signal {
+export class BeatSignal implements IBeatSignal {
   type: 'beat' = 'beat';
   name: string;
 

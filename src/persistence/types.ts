@@ -5,7 +5,7 @@
  * They're separate from runtime types to ensure only serializable data is persisted.
  */
 
-import { SignalType, LFOConfig, MicrophoneConfig, BeatConfig, MIDIConfig } from '../signals';
+import { SignalType, LFOConfig, MicrophoneConfig, BeatConfig, MIDIConfig, GamepadConfig } from '../signals';
 
 // Version for schema migrations
 export const SCHEMA_VERSION = 1;
@@ -15,8 +15,8 @@ export interface PersistedSignal {
   id: string;
   type: SignalType;
   name: string;
-  config: LFOConfig | MicrophoneConfig | BeatConfig | MIDIConfig;
-  // MIDI-specific persisted state
+  config: LFOConfig | MicrophoneConfig | BeatConfig | MIDIConfig | GamepadConfig;
+  // MIDI/Gamepad-specific persisted state
   isLearned?: boolean;
 }
 

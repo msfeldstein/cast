@@ -15,7 +15,7 @@ import {
   SimpleLayoutConfig,
   DEFAULT_STATE,
 } from './types';
-import { signalManager, MIDISignal } from '../signals';
+import { signalManager } from '../signals';
 
 class AppStateManager {
   private simpleLayout: SimpleLayoutConfig | null = null;
@@ -102,9 +102,9 @@ class AppStateManager {
         config: signal.getConfig(),
       };
 
-      // MIDI-specific: persist learned state
-      if (signal.type === 'midi') {
-        persisted.isLearned = (signal as MIDISignal).isLearned();
+      // MIDI/Gamepad-specific: persist learned state
+      if (signal.type === 'midi' || signal.type === 'gamepad') {
+        persisted.isLearned = signal.isLearned();
       }
 
       return persisted;
@@ -138,9 +138,9 @@ class AppStateManager {
         if (signal) {
           signal.name = persisted.name;
 
-          // MIDI-specific: restore learned state
-          if (signal.type === 'midi' && persisted.isLearned) {
-            (signal as MIDISignal).setLearned(true);
+          // MIDI/Gamepad-specific: restore learned state
+          if ((signal.type === 'midi' || signal.type === 'gamepad') && persisted.isLearned) {
+            signal.setLearned(true);
           }
         }
       } catch (error) {

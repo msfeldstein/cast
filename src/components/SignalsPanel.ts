@@ -11,6 +11,8 @@ import {
   BeatConfig,
   MIDIConfig,
   MIDISignal,
+  GamepadConfig,
+  GamepadSignal,
 } from '../signals';
 import { appStateManager } from '../persistence';
 import { Slider } from './Slider';
@@ -43,6 +45,7 @@ export class SignalsPanel extends Component {
           <button data-type="microphone" title="Add Microphone input">+ Mic</button>
           <button data-type="beat" title="Add Beat detection">+ Beat</button>
           <button data-type="midi" title="Add MIDI input">+ MIDI</button>
+          <button data-type="gamepad" title="Add Gamepad input">+ Gamepad</button>
         </div>
       </div>
       <div class="signals-list"></div>
@@ -149,7 +152,7 @@ interface SignalItemOptions {
   expanded: boolean;
   onToggleExpand: () => void;
   onRemove: () => void;
-  onConfigChange: (config: Partial<LFOConfig | MicrophoneConfig | BeatConfig | MIDIConfig>) => void;
+  onConfigChange: (config: Partial<LFOConfig | MicrophoneConfig | BeatConfig | MIDIConfig | GamepadConfig>) => void;
 }
 
 /**
@@ -161,7 +164,7 @@ class SignalItem extends Component {
   private expanded: boolean;
   private onToggleExpand: () => void;
   private onRemove: () => void;
-  private onConfigChange: (config: Partial<LFOConfig | MicrophoneConfig | BeatConfig | MIDIConfig>) => void;
+  private onConfigChange: (config: Partial<LFOConfig | MicrophoneConfig | BeatConfig | MIDIConfig | GamepadConfig>) => void;
 
   private valueFill!: HTMLElement;
   private bindingCountEl!: HTMLElement;
@@ -267,6 +270,9 @@ class SignalItem extends Component {
         break;
       case 'midi':
         this.buildMIDIConfig();
+        break;
+      case 'gamepad':
+        this.buildGamepadConfig();
         break;
     }
   }
@@ -415,6 +421,92 @@ class SignalItem extends Component {
         this.buildMIDIConfig();
       });
       this.buildMIDIConfig();
+    });
+    this.configContainer.appendChild(relearnBtn);
+  }
+
+  private buildGamepadConfig(): void {
+    const gamepadSignal = this.signal as GamepadSignal;
+    const config = this.signal.getConfig() as GamepadConfig;
+    const isListening = gamepadSignal.isListening();
+    const isLearned = gamepadSignal.isLearned();
+
+    this.configContainer.innerHTML = '';
+
+    if (isListening) {
+      const learnContainer = document.createElement('div');
+      learnContainer.className = 'gamepad-learn-container';
+      learnContainer.innerHTML = `
+        <div class="gamepad-learn-message">Move an axis or press a button...</div>
+        <button class="gamepad-cancel-btn">Cancel</button>
+      `;
+      learnContainer.querySelector('.gamepad-cancel-btn')!.addEventListener('click', () => {
+        gamepadSignal.stopListening();
+        this.buildGamepadConfig();
+      });
+      this.configContainer.appendChild(learnContainer);
+      return;
+    }
+
+    if (!isLearned) {
+      const learnContainer = document.createElement('div');
+      learnContainer.className = 'gamepad-learn-container';
+      learnContainer.innerHTML = `
+        <button class="gamepad-learn-btn">Learn Gamepad</button>
+        <div class="gamepad-learn-hint">Click then move an axis or press a button</div>
+      `;
+      learnContainer.querySelector('.gamepad-learn-btn')!.addEventListener('click', () => {
+        gamepadSignal.startListening(() => {
+          appStateManager.saveState();
+          this.buildGamepadConfig();
+        });
+        this.buildGamepadConfig();
+      });
+      this.configContainer.appendChild(learnContainer);
+      return;
+    }
+
+    // Learned state
+    const infoDiv = document.createElement('div');
+    infoDiv.className = 'gamepad-learned-info';
+    infoDiv.innerHTML = `
+      <span class="gamepad-learned-label">${config.inputType === 'axis' ? 'Axis' : 'Button'} ${config.inputIndex}</span>
+      <span class="gamepad-learned-device">Gamepad ${config.gamepadIndex + 1}</span>
+    `;
+    this.configContainer.appendChild(infoDiv);
+
+    // Axis-specific controls
+    if (config.inputType === 'axis') {
+      // Deadzone slider
+      this.addConfigSlider('Deadzone', config.deadzone, 0, 0.5, 0.01, (v) => {
+        this.onConfigChange({ deadzone: v });
+      });
+
+      // Invert checkbox
+      const invertRow = document.createElement('div');
+      invertRow.className = 'config-row checkbox';
+      invertRow.innerHTML = `
+        <label>
+          <input type="checkbox" ${config.invert ? 'checked' : ''}>
+          Invert
+        </label>
+      `;
+      invertRow.querySelector('input')!.addEventListener('change', (e) => {
+        this.onConfigChange({ invert: (e.target as HTMLInputElement).checked });
+      });
+      this.configContainer.appendChild(invertRow);
+    }
+
+    const relearnBtn = document.createElement('button');
+    relearnBtn.className = 'gamepad-relearn-btn';
+    relearnBtn.textContent = 'Re-learn';
+    relearnBtn.addEventListener('click', () => {
+      gamepadSignal.clearLearning();
+      gamepadSignal.startListening(() => {
+        appStateManager.saveState();
+        this.buildGamepadConfig();
+      });
+      this.buildGamepadConfig();
     });
     this.configContainer.appendChild(relearnBtn);
   }

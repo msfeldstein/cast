@@ -1,4 +1,4 @@
-import { Signal, MIDIConfig } from '../types';
+import { MIDISignalType, MIDIConfig } from '../types';
 
 const DEFAULT_CONFIG: MIDIConfig = {
   type: 'midi',
@@ -8,7 +8,7 @@ const DEFAULT_CONFIG: MIDIConfig = {
   velocityMode: true,
 };
 
-export class MIDISignal implements Signal {
+export class MIDISignal implements MIDISignalType {
   type: 'midi' = 'midi';
   name: string;
 

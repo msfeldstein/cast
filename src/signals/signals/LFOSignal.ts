@@ -1,4 +1,4 @@
-import { Signal, LFOConfig } from '../types';
+import { LFOSignal as ILFOSignal, LFOConfig } from '../types';
 
 const DEFAULT_CONFIG: LFOConfig = {
   type: 'lfo',
@@ -9,7 +9,7 @@ const DEFAULT_CONFIG: LFOConfig = {
   offset: 0.5,
 };
 
-export class LFOSignal implements Signal {
+export class LFOSignal implements ILFOSignal {
   type: 'lfo' = 'lfo';
   name: string;
 

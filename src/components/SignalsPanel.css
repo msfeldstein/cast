@@ -314,3 +314,99 @@
   color: #fff;
   border-color: #555;
 }
+
+/* Gamepad signal styling */
+.signal-type-gamepad .signal-type-badge {
+  background: #27ae60;
+}
+
+.signal-type-gamepad .signal-value-fill {
+  background: #27ae60;
+}
+
+/* Gamepad Learn UI */
+.gamepad-learn-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 0;
+}
+
+.gamepad-learn-btn {
+  background: #27ae60;
+  border: none;
+  color: #fff;
+  padding: 10px 20px;
+  border-radius: 4px;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+
+.gamepad-learn-btn:hover {
+  background: #219a52;
+}
+
+.gamepad-learn-hint {
+  font-size: 10px;
+  color: #888;
+}
+
+.gamepad-learn-message {
+  font-size: 12px;
+  color: #27ae60;
+  animation: pulse 1.5s ease-in-out infinite;
+}
+
+.gamepad-cancel-btn {
+  background: #444;
+  border: none;
+  color: #aaa;
+  padding: 6px 12px;
+  border-radius: 3px;
+  font-size: 11px;
+  cursor: pointer;
+}
+
+.gamepad-cancel-btn:hover {
+  background: #555;
+  color: #fff;
+}
+
+.gamepad-learned-info {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 6px 0;
+  font-size: 12px;
+}
+
+.gamepad-learned-label {
+  color: #27ae60;
+  font-weight: 600;
+}
+
+.gamepad-learned-device {
+  color: #888;
+  font-size: 10px;
+}
+
+.gamepad-relearn-btn {
+  background: #333;
+  border: 1px solid #444;
+  color: #aaa;
+  padding: 6px 12px;
+  border-radius: 3px;
+  font-size: 11px;
+  cursor: pointer;
+  width: 100%;
+  margin-top: 4px;
+}
+
+.gamepad-relearn-btn:hover {
+  background: #3a3a3a;
+  color: #fff;
+  border-color: #555;
+}

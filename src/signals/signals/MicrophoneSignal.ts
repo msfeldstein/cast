@@ -1,4 +1,4 @@
-import { Signal, MicrophoneConfig } from '../types';
+import { MicrophoneSignal as IMicrophoneSignal, MicrophoneConfig } from '../types';
 
 const DEFAULT_CONFIG: MicrophoneConfig = {
   type: 'microphone',
@@ -7,7 +7,7 @@ const DEFAULT_CONFIG: MicrophoneConfig = {
   noiseFloor: 0.01,
 };
 
-export class MicrophoneSignal implements Signal {
+export class MicrophoneSignal implements IMicrophoneSignal {
   type: 'microphone' = 'microphone';
   name: string;
 
