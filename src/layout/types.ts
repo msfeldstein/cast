@@ -35,6 +35,10 @@ export interface DragData {
   tabId: string;
   tabTitle: string;
   sourcePanelId: string;
+  /** If set, this is a drag to create a new signal rather than move an existing tab */
+  createSignalType?: string;
+  /** If set, this is a drag to create a new layer */
+  createLayer?: boolean;
 }
 
 // Helper functions
@@ -185,7 +189,7 @@ export function addTabToPanel(
   dropZone: DropZone
 ): LayoutNode {
   if (dropZone === 'center') {
-    // Add as a new tab
+    // Add as a new tab at the end
     const panel = findPanelById(root, targetPanelId);
     if (panel) {
       panel.tabs.push(tab);
@@ -199,6 +203,25 @@ export function addTabToPanel(
 
   // Split the target panel
   return splitPanel(root, targetPanelId, newPanel, dropZone);
+}
+
+/**
+ * Insert a tab into a panel at a specific index.
+ */
+export function insertTabAtIndex(
+  root: LayoutNode,
+  targetPanelId: string,
+  tab: TabConfig,
+  index: number
+): LayoutNode {
+  const panel = findPanelById(root, targetPanelId);
+  if (panel) {
+    // Clamp index to valid range
+    const insertIndex = Math.max(0, Math.min(index, panel.tabs.length));
+    panel.tabs.splice(insertIndex, 0, tab);
+    panel.activeTabId = tab.id;
+  }
+  return root;
 }
 
 /**
@@ -259,6 +282,47 @@ export function splitPanel(
 }
 
 /**
+ * Find all panel nodes in the tree.
+ */
+export function findAllPanels(node: LayoutNode): PanelNode[] {
+  if (node.type === 'panel') {
+    return [node];
+  }
+  return [...findAllPanels(node.first), ...findAllPanels(node.second)];
+}
+
+/**
+ * Add a new panel to the layout by splitting an existing panel.
+ * If targetPanelId is provided, splits that panel. Otherwise splits the last panel.
+ * Returns the new panel's ID.
+ */
+export function addPanel(
+  root: LayoutNode,
+  tab: TabConfig,
+  targetPanelId?: string,
+  position: 'left' | 'right' | 'top' | 'bottom' = 'bottom'
+): { layout: LayoutNode; panelId: string } {
+  // Find target panel
+  let targetId = targetPanelId;
+  if (!targetId) {
+    const panels = findAllPanels(root);
+    targetId = panels[panels.length - 1]?.id;
+  }
+  if (!targetId) {
+    // Tree is empty, create a single panel
+    const panel = createPanelNode([tab], tab.id);
+    return { layout: panel, panelId: panel.id };
+  }
+
+  // Create a new panel for the tab
+  const newPanel = createPanelNode([tab], tab.id);
+
+  // Split the target panel
+  const newLayout = splitPanel(root, targetId, newPanel, position);
+  return { layout: newLayout, panelId: newPanel.id };
+}
+
+/**
  * Clone a layout tree (deep copy).
  */
 export function cloneLayout(node: LayoutNode): LayoutNode {
@@ -285,19 +349,8 @@ export function createDefaultLayout(): LayoutNode {
     createSplitNode(
       'vertical',
       createPanelNode([{ id: 'layer-1', title: 'Layer 1' }], 'layer-1'),
-      createSplitNode(
-        'vertical',
-        createPanelNode([{ id: 'layer-2', title: 'Layer 2' }], 'layer-2'),
-        createPanelNode(
-          [
-            { id: 'library', title: 'Library' },
-            { id: 'signals', title: 'Signals' },
-          ],
-          'library'
-        ),
-        0.538
-      ),
-      0.35
+      createPanelNode([{ id: 'library', title: 'Library' }], 'library'),
+      0.5
     ),
     0.6
   );

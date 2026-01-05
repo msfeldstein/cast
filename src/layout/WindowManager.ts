@@ -1,6 +1,6 @@
 import { Component } from '../ui/Component';
 import { EventEmitter } from '../ui/EventEmitter';
-import { Panel } from './Panel';
+import { Panel, TabValueProvider } from './Panel';
 import { Divider } from './Divider';
 import { dragManager } from './DragManager';
 import {
@@ -8,11 +8,14 @@ import {
   PanelNode,
   SplitNode,
   DropZone,
+  TabConfig,
   createDefaultLayout,
   cloneLayout,
   removeTab,
   addTabToPanel,
   findPanelByTabId,
+  addPanel,
+  insertTabAtIndex,
 } from './types';
 
 export interface WindowManagerEvents {
@@ -34,6 +37,7 @@ export class WindowManager extends EventEmitter<WindowManagerEvents> {
   private panels: Map<string, Panel> = new Map();
   private dividers: Divider[] = [];
   private contentFactories: Map<string, () => Component> = new Map();
+  private valueProvider: TabValueProvider | null = null;
   private cleanupFns: (() => void)[] = [];
 
   constructor(container: HTMLElement, initialLayout?: LayoutNode) {
@@ -55,12 +59,53 @@ export class WindowManager extends EventEmitter<WindowManagerEvents> {
     this.cleanupFns.push(handleDrop);
   }
 
+  private handleTabDrop(targetPanelId: string, index: number): void {
+    const dragData = dragManager.getDragData();
+    if (!dragData) return;
+
+    // Skip if this is a signal/layer creation drag (handled by App)
+    if (dragData.createSignalType || dragData.createLayer) return;
+
+    const { tabId } = dragData;
+
+    // Find the tab being dragged
+    const sourcePanel = findPanelByTabId(this.layout, tabId);
+    if (!sourcePanel) return;
+
+    const tab = sourcePanel.tabs.find((t) => t.id === tabId);
+    if (!tab) return;
+
+    // Don't do anything if it's the same position
+    if (sourcePanel.id === targetPanelId) {
+      const currentIndex = sourcePanel.tabs.findIndex((t) => t.id === tabId);
+      if (currentIndex === index || currentIndex === index - 1) {
+        return;
+      }
+    }
+
+    // Remove the tab from source
+    const newLayout = removeTab(this.layout, tabId);
+    if (!newLayout) return;
+    this.layout = newLayout;
+
+    // Insert the tab at the specified index
+    this.layout = insertTabAtIndex(this.layout, targetPanelId, tab, index);
+
+    // Re-render and notify
+    this.render();
+    this.emitLayoutChange();
+  }
+
   private handleDrop(
     tabId: string,
     sourcePanelId: string,
     targetPanelId: string,
     zone: DropZone
   ): void {
+    // Skip if this is a signal/layer creation drag (handled by App)
+    const dragData = dragManager.getDragData();
+    if (dragData?.createSignalType || dragData?.createLayer) return;
+
     // Find the tab being dragged
     const sourcePanel = findPanelByTabId(this.layout, tabId);
     if (!sourcePanel) return;
@@ -130,10 +175,25 @@ export class WindowManager extends EventEmitter<WindowManagerEvents> {
       return factory();
     });
 
+    // Apply value provider if set
+    if (this.valueProvider) {
+      panel.setValueProvider(this.valueProvider);
+    }
+
     // Listen for tab changes to update layout state
     panel.on('tab:change', ({ tabId }) => {
       node.activeTabId = tabId;
       this.emitLayoutChange();
+    });
+
+    // Listen for tab drops on the title bar
+    panel.on('tab:drop', ({ index }) => {
+      this.handleTabDrop(node.id, index);
+    });
+
+    // Listen for tab close requests
+    panel.on('tab:close', ({ tabId }) => {
+      this.removePanel(tabId);
     });
 
     panel.mount(container);
@@ -158,6 +218,7 @@ export class WindowManager extends EventEmitter<WindowManagerEvents> {
     const divider = new Divider({
       orientation: node.direction === 'horizontal' ? 'vertical' : 'horizontal',
       onResize: (delta) => this.handleDividerResize(node, container, delta),
+      onDrop: () => this.handleDividerDrop(node),
     });
     divider.mount(dividerContainer);
     this.dividers.push(divider);
@@ -196,6 +257,60 @@ export class WindowManager extends EventEmitter<WindowManagerEvents> {
       firstChild.style.width = '100%';
       secondChild.style.width = '100%';
     }
+  }
+
+  private handleDividerDrop(node: SplitNode): void {
+    const dragData = dragManager.getDragData();
+    if (!dragData) return;
+
+    const { tabId, tabTitle } = dragData;
+
+    // Don't allow dropping on self
+    const sourcePanel = findPanelByTabId(this.layout, tabId);
+    if (!sourcePanel) return;
+
+    // Remove the tab from source
+    const newLayout = removeTab(this.layout, tabId);
+    if (!newLayout) return;
+    this.layout = newLayout;
+
+    // Create a new panel for the dropped tab
+    const newPanel: PanelNode = {
+      type: 'panel',
+      id: `node-${Date.now()}`,
+      tabs: [{ id: tabId, title: tabTitle }],
+      activeTabId: tabId,
+    };
+
+    // Insert the new panel between first and second by wrapping second in a new split
+    // The new panel goes before the second child (in the middle of the divider)
+    this.insertPanelAtDivider(node, newPanel);
+
+    // End the drag operation
+    dragManager.endDrag();
+
+    // Re-render and notify
+    this.render();
+    this.emitLayoutChange();
+  }
+
+  private insertPanelAtDivider(node: SplitNode, newPanel: PanelNode): void {
+    // Wrap the second child in a new split with the new panel
+    // This inserts the new panel between first and second
+    const newSplit: SplitNode = {
+      type: 'split',
+      id: `node-${Date.now() + 1}`,
+      direction: node.direction,
+      ratio: 0.5,
+      first: newPanel,
+      second: node.second,
+    };
+
+    // Update node's second to be the new split
+    node.second = newSplit;
+
+    // Adjust the parent ratio to give equal space
+    node.ratio = node.ratio * 0.67; // Shrink first to make room
   }
 
   private handleDividerResize(node: SplitNode, container: HTMLElement, delta: number): void {
@@ -314,6 +429,17 @@ export class WindowManager extends EventEmitter<WindowManagerEvents> {
   }
 
   /**
+   * Set a value provider for tab backgrounds (used for signal values).
+   */
+  setValueProvider(provider: TabValueProvider): void {
+    this.valueProvider = provider;
+    // Apply to all existing panels
+    for (const panel of this.panels.values()) {
+      panel.setValueProvider(provider);
+    }
+  }
+
+  /**
    * Get a panel by ID.
    */
   getPanel(id: string): Panel | undefined {
@@ -333,6 +459,45 @@ export class WindowManager extends EventEmitter<WindowManagerEvents> {
   setLayout(layout: LayoutNode): void {
     this.layout = cloneLayout(layout);
     this.render();
+  }
+
+  /**
+   * Add a new panel to the layout.
+   * Returns the new panel's ID.
+   */
+  addPanel(
+    tab: TabConfig,
+    targetPanelId?: string,
+    position: 'left' | 'right' | 'top' | 'bottom' = 'bottom'
+  ): string {
+    const result = addPanel(this.layout, tab, targetPanelId, position);
+    this.layout = result.layout;
+    this.render();
+    this.emitLayoutChange();
+    return result.panelId;
+  }
+
+  /**
+   * Remove a panel from the layout by its tab ID.
+   * This removes the tab from the panel, and if the panel becomes empty,
+   * removes the panel from the layout tree.
+   */
+  removePanel(tabId: string): void {
+    const newLayout = removeTab(this.layout, tabId);
+    if (newLayout) {
+      this.layout = newLayout;
+      this.render();
+      this.emitLayoutChange();
+    }
+  }
+
+  /**
+   * Add a new panel at a specific target location (for drag & drop).
+   */
+  addPanelAtTarget(tab: TabConfig, targetPanelId: string, zone: DropZone): void {
+    this.layout = addTabToPanel(this.layout, targetPanelId, tab, zone);
+    this.render();
+    this.emitLayoutChange();
   }
 
   /**

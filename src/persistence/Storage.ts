@@ -114,12 +114,22 @@ class Storage {
         version: 1,
         signals: current.signals || [],
         bindings: current.bindings || [],
+        layers: [],
         layout: current.layout || null,
       };
     }
 
+    // Migration from version 1 to 2: add layers array
+    if (current.version < 2) {
+      current = {
+        ...current,
+        version: 2,
+        layers: current.layers || [],
+      };
+    }
+
     // Future migrations would go here:
-    // if (current.version < 2) { ... }
+    // if (current.version < 3) { ... }
 
     return current;
   }

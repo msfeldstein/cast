@@ -5,4 +5,7 @@ export type {
   PersistedSignal,
   PersistedBinding,
   PersistedLayout,
+  PersistedLayer,
+  PersistedEffect,
+  PersistedControls,
 } from './types';

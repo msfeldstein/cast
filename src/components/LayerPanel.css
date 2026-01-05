@@ -3,8 +3,7 @@
   display: flex;
   flex-direction: column;
   height: 100%;
-  padding: 8px;
-  gap: 8px;
+  gap: 0;
   transition: background 0.15s;
   overflow-y: auto;
 }
@@ -26,9 +25,8 @@
   background: #555;
 }
 
-.layer-panel.drag-over {
+.layer-preview.drag-over {
   background: #2a3a4a;
-  
 }
 
 
@@ -61,69 +59,222 @@
 .layer-controls {
   display: flex;
   flex-direction: column;
-  gap: 8px;
-  padding: 4px 0;
   flex-shrink: 0;
 }
 
 .layer-controls-row {
   display: flex;
   align-items: center;
-  justify-content: space-between;
-  gap: 8px;
+  gap: 0;
 }
 
+/* Custom checkbox with eye icon */
 .layer-visibility {
   display: flex;
   align-items: center;
-  gap: 4px;
-  font-size: 12px;
+  justify-content: center;
   cursor: pointer;
-  color: #aaa;
+  flex-shrink: 0;
+  width: 24px;
+  height: 24px;
+  background: #2a2a2a;
+  border: 1px solid #444;
+  position: relative;
+}
+
+.layer-visibility:hover {
+  background: #333;
+  border-color: #555;
 }
 
 .layer-visibility input {
+  position: absolute;
+  opacity: 0;
+  width: 100%;
+  height: 100%;
   cursor: pointer;
+  margin: 0;
+}
+
+/* Eye icon */
+.layer-visibility::before {
+  content: '';
+  width: 14px;
+  height: 8px;
+  border: 1.5px solid #555;
+  border-radius: 50%;
+  position: relative;
+  pointer-events: none;
+}
+
+.layer-visibility::after {
+  content: '';
+  width: 4px;
+  height: 4px;
+  background: #555;
+  border-radius: 50%;
+  position: absolute;
+  pointer-events: none;
+}
+
+/* Hidden state - line through */
+.layer-visibility:has(input:not(:checked))::before {
+  border-color: #444;
+}
+
+.layer-visibility:has(input:not(:checked))::after {
+  background: #444;
+  width: 16px;
+  height: 1.5px;
+  border-radius: 0;
+  transform: rotate(-45deg);
+}
+
+/* Visible state */
+.layer-visibility:has(input:checked)::before {
+  border-color: #888;
+}
+
+.layer-visibility:has(input:checked)::after {
+  background: #888;
+}
+
+/* Hover states */
+.layer-visibility:hover::before {
+  border-color: #aaa;
+}
+
+.layer-visibility:has(input:checked):hover::after {
+  background: #aaa;
+}
+
+.layer-visibility:has(input:not(:checked)):hover::after {
+  background: #666;
+}
+
+/* Custom dropdown */
+.blend-select {
+  flex-shrink: 0;
+  position: relative;
+  height: 24px;
 }
 
 .blend-select select {
-  background: #333;
-  color: #e0e0e0;
+  height: 24px;
+  background: #2a2a2a;
+  color: #aaa;
   border: 1px solid #444;
-  
-  padding: 4px 8px;
+  padding: 0 24px 0 8px;
   font-size: 11px;
   cursor: pointer;
+  appearance: none;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+}
+
+.blend-select::after {
+  content: '▼';
+  position: absolute;
+  right: 6px;
+  top: 50%;
+  transform: translateY(-50%);
+  font-size: 7px;
+  color: #666;
+  pointer-events: none;
 }
 
 .blend-select select:hover {
-  background: #3a3a3a;
+  background: #333;
+  border-color: #555;
+  color: #ccc;
+}
+
+.blend-select select:focus {
+  outline: none;
+  border-color: #666;
+}
+
+/* Opacity slider in row */
+.layer-controls-row .opacity-slider-container {
+  flex: 1;
+  min-width: 0;
+}
+
+.layer-controls-row .opacity-slider-container .slider {
+  height: 24px;
+  min-height: 24px;
+}
+
+.layer-controls-row .opacity-slider-container .slider-label {
+  display: none;
+}
+
+.layer-controls-row .opacity-slider-container .slider-value {
+  font-size: 11px;
+  top: 50%;
+  bottom: auto;
+  transform: translateY(-50%);
 }
 
 /* Sketch Controls */
 .sketch-controls {
-  border-top: 1px solid #333;
-  padding-top: 8px;
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: 0;
 }
 
 .sketch-controls-header {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  height: 24px;
+  padding: 0 8px;
   font-size: 11px;
   color: #888;
   text-transform: uppercase;
   letter-spacing: 0.5px;
+  cursor: pointer;
+  user-select: none;
+  background: #252525;
+}
+
+.sketch-controls-header:hover {
+  color: #aaa;
+}
+
+.sketch-controls-toggle {
+  font-size: 8px;
+  width: 12px;
+  text-align: center;
+  color: #666;
+}
+
+.sketch-controls-header:hover .sketch-controls-toggle {
+  color: #888;
+}
+
+.sketch-controls-name {
+  flex: 1;
+}
+
+.sketch-controls-body {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+}
+
+.sketch-controls.collapsed .sketch-controls-body {
+  display: none;
 }
 
 .color-control {
   display: flex;
   align-items: center;
   gap: 8px;
+  height: 36px;
   font-size: 12px;
   background: #2a2a2a;
-  
-  padding: 8px;
+  padding: 0 8px;
 }
 
 .color-control label {
@@ -153,9 +304,9 @@
 .trigger-button {
   background: #3a3a3a;
   color: #e0e0e0;
-  border: 1px solid #555;
-  
-  padding: 10px 16px;
+  border: none;
+  height: 36px;
+  padding: 0 16px;
   font-size: 12px;
   cursor: pointer;
   transition: background 0.1s, transform 0.05s;
@@ -169,4 +320,167 @@
 .trigger-button:active {
   background: #888;
   transform: scale(0.98);
+}
+
+/* Effects Section */
+.effects-section {
+  display: flex;
+  flex-direction: column;
+  border-top: 1px solid #333;
+}
+
+.effects-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  height: 28px;
+  padding: 0 8px;
+  background: #1a1a1a;
+}
+
+.effects-title {
+  font-size: 11px;
+  color: #888;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.add-effect-btn {
+  width: 20px;
+  height: 20px;
+  background: #3a3a3a;
+  border: 1px solid #555;
+  color: #aaa;
+  font-size: 16px;
+  line-height: 1;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+}
+
+.add-effect-btn:hover {
+  background: #4a4a4a;
+  color: #fff;
+  border-color: #666;
+}
+
+.effects-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+}
+
+/* Individual Effect */
+.effect-item {
+  display: flex;
+  flex-direction: column;
+  border-bottom: 1px solid #2a2a2a;
+  cursor: grab;
+}
+
+.effect-item.dragging {
+  opacity: 0.5;
+  cursor: grabbing;
+}
+
+.effect-item.drag-over-above {
+  border-top: 2px solid #9b59b6;
+}
+
+.effect-item.drag-over-below {
+  border-bottom: 2px solid #9b59b6;
+}
+
+.effect-header {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  height: 24px;
+  padding: 0 8px;
+  font-size: 11px;
+  color: #888;
+  cursor: pointer;
+  user-select: none;
+  background: #252525;
+}
+
+.effect-header:hover {
+  background: #2a2a2a;
+  color: #aaa;
+}
+
+.effect-drag-handle {
+  font-size: 10px;
+  color: #555;
+  cursor: grab;
+  padding: 0 2px;
+  letter-spacing: -2px;
+}
+
+.effect-drag-handle:hover {
+  color: #888;
+}
+
+.effect-item.dragging .effect-drag-handle {
+  cursor: grabbing;
+}
+
+.effect-toggle {
+  font-size: 8px;
+  width: 12px;
+  text-align: center;
+  color: #666;
+}
+
+.effect-header:hover .effect-toggle {
+  color: #888;
+}
+
+.effect-name {
+  flex: 1;
+}
+
+.effect-enable {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+}
+
+.effect-enable input {
+  width: 12px;
+  height: 12px;
+  cursor: pointer;
+  accent-color: #9b59b6;
+}
+
+.effect-remove {
+  width: 18px;
+  height: 18px;
+  background: transparent;
+  border: none;
+  color: #666;
+  font-size: 14px;
+  line-height: 1;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+}
+
+.effect-remove:hover {
+  color: #ff6b6b;
+}
+
+.effect-controls-body {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+}
+
+.effect-item.collapsed .effect-controls-body {
+  display: none;
 }

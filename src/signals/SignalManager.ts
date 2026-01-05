@@ -23,7 +23,7 @@ export interface SignalManagerEvents {
   'signal:remove': { signalId: string };
   'signal:config': { signal: Signal };
   'binding:add': { binding: ControlBinding };
-  'binding:remove': { layerId: string; controlName: string };
+  'binding:remove': { layerId: string; controlName: string; effectId?: string };
   /** Generic change event for backward compatibility */
   'change': void;
 }
@@ -145,37 +145,52 @@ export class SignalManager extends EventEmitter<SignalManagerEvents> {
 
   bind(target: ControlTarget, signalId: string): void {
     // Remove existing binding for this control
-    this.unbind(target.layerId, target.controlName);
+    this.unbind(target.layerId, target.controlName, target.effectId);
 
     const binding: ControlBinding = {
       layerId: target.layerId,
       controlName: target.controlName,
       signalId,
+      effectId: target.effectId,
     };
     this.bindings.push(binding);
     this.emit('binding:add', { binding });
     this.emit('change', undefined);
   }
 
-  unbind(layerId: string, controlName: string): void {
+  unbind(layerId: string, controlName: string, effectId?: string): void {
     const index = this.bindings.findIndex(
-      (b) => b.layerId === layerId && b.controlName === controlName
+      (b) => b.layerId === layerId &&
+             b.controlName === controlName &&
+             b.effectId === effectId
     );
     if (index !== -1) {
       this.bindings.splice(index, 1);
-      this.emit('binding:remove', { layerId, controlName });
+      this.emit('binding:remove', { layerId, controlName, effectId });
       this.emit('change', undefined);
     }
   }
 
-  getBinding(layerId: string, controlName: string): ControlBinding | undefined {
+  getBinding(layerId: string, controlName: string, effectId?: string): ControlBinding | undefined {
     return this.bindings.find(
-      (b) => b.layerId === layerId && b.controlName === controlName
+      (b) => b.layerId === layerId &&
+             b.controlName === controlName &&
+             b.effectId === effectId
     );
   }
 
   getBindingsForSignal(signalId: string): ControlBinding[] {
     return this.bindings.filter((b) => b.signalId === signalId);
+  }
+
+  getBindingsForLayer(layerId: string): ControlBinding[] {
+    return this.bindings.filter((b) => b.layerId === layerId);
+  }
+
+  getBindingsForEffect(layerId: string, effectId: string): ControlBinding[] {
+    return this.bindings.filter(
+      (b) => b.layerId === layerId && b.effectId === effectId
+    );
   }
 
   getAllBindings(): ControlBinding[] {
@@ -190,14 +205,15 @@ export class SignalManager extends EventEmitter<SignalManagerEvents> {
     }
   }
 
-  // Get mapped value for a bound control
+  // Get mapped value for a bound control (sketch or effect)
   getMappedValue(
     layerId: string,
     controlName: string,
     min: number,
-    max: number
+    max: number,
+    effectId?: string
   ): number | undefined {
-    const binding = this.getBinding(layerId, controlName);
+    const binding = this.getBinding(layerId, controlName, effectId);
     if (!binding) return undefined;
 
     const signal = this.signals.get(binding.signalId);

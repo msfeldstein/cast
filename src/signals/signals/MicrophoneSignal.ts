@@ -2,7 +2,8 @@ import { MicrophoneSignal as IMicrophoneSignal, MicrophoneConfig } from '../type
 
 const DEFAULT_CONFIG: MicrophoneConfig = {
   type: 'microphone',
-  smoothing: 0.8,
+  attack: 0.2,    // Fast attack (low smoothing going up)
+  release: 0.85,  // Slow release (high smoothing going down)
   gain: 1.0,
   noiseFloor: 0.01,
 };
@@ -72,10 +73,14 @@ export class MicrophoneSignal implements IMicrophoneSignal {
     // Clamp to 0-1
     value = Math.min(1, value);
 
-    // Apply smoothing
+    // Apply asymmetric smoothing (attack/release)
+    const smoothing = value > this.smoothedValue
+      ? this.config.attack   // Going up - use attack (lower = faster)
+      : this.config.release; // Going down - use release (higher = slower)
+
     this.smoothedValue =
-      this.smoothedValue * this.config.smoothing +
-      value * (1 - this.config.smoothing);
+      this.smoothedValue * smoothing +
+      value * (1 - smoothing);
 
     this.currentValue = this.smoothedValue;
   }

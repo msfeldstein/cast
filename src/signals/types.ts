@@ -74,7 +74,8 @@ export interface LFOConfig {
 // Microphone Configuration
 export interface MicrophoneConfig {
   type: 'microphone';
-  smoothing: number;   // 0-1, how much to smooth input
+  attack: number;      // 0-1, how fast to rise (0 = instant, 1 = slow)
+  release: number;     // 0-1, how fast to fall (0 = instant, 1 = slow)
   gain: number;        // Amplification factor
   noiseFloor: number;  // Threshold below which output is 0
 }
@@ -114,6 +115,7 @@ export interface ControlBinding {
   layerId: string;
   controlName: string;
   signalId: string;
+  effectId?: string;  // If present, binding targets an effect's control instead of sketch
 }
 
 // Control target identifier for binding
@@ -122,4 +124,5 @@ export interface ControlTarget {
   controlName: string;
   min: number;
   max: number;
+  effectId?: string;  // If present, target is an effect's control
 }

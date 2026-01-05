@@ -141,6 +141,7 @@
 }
 
 .panel-tab {
+  position: relative;
   padding: 0 16px;
   height: 100%;
   background: transparent;
@@ -152,6 +153,40 @@
   white-space: nowrap;
   transition: color 0.1s, background-color 0.1s;
   border-right: 1px solid #333;
+  overflow: hidden;
+}
+
+.panel-tab-fill {
+  position: absolute;
+  left: 0;
+  top: 0;
+  height: 100%;
+  width: 0%;
+  background: linear-gradient(to right, #555, #444);
+  pointer-events: none;
+  transition: width 0.05s ease-out;
+}
+
+.panel-tab-text {
+  position: relative;
+  z-index: 1;
+}
+
+/* Tab drop indicator */
+.tab-drop-indicator {
+  position: absolute;
+  top: 4px;
+  bottom: 4px;
+  width: 2px;
+  background: #888;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.1s;
+  z-index: 100;
+}
+
+.tab-drop-indicator.visible {
+  opacity: 1;
 }
 
 .panel-tab:hover {
@@ -254,6 +289,27 @@
   height: 6px;
 }
 
+/* Divider drop target states */
+.divider.drop-enabled {
+  z-index: 200;
+}
+
+.split-divider-horizontal .divider.drop-enabled {
+  /* Expand hit area during drag */
+  margin: 0 -8px;
+  padding: 0 8px;
+}
+
+.split-divider-vertical .divider.drop-enabled {
+  /* Expand hit area during drag */
+  margin: -8px 0;
+  padding: 8px 0;
+}
+
+.divider.drop-hover {
+  background: #888 !important;
+}
+
 /* Panel container */
 .panel-container {
   width: 100%;
@@ -266,6 +322,7 @@
    ========================================== */
 
 .panel-title-bar {
+  position: relative;
   display: flex;
   align-items: center;
   background: #252525;
@@ -302,7 +359,20 @@
   
 }
 
+.panel-title-fill {
+  position: absolute;
+  left: 0;
+  top: 0;
+  height: 100%;
+  width: 0%;
+  background: linear-gradient(to right, #555, #444);
+  pointer-events: none;
+  transition: width 0.05s ease-out;
+}
+
 .panel-title-text {
+  position: relative;
+  z-index: 1;
   padding: 0 12px;
   font-size: 12px;
   font-weight: 500;
@@ -405,4 +475,36 @@ body.panel-dragging * {
 .placeholder-text {
   padding: 20px;
   text-align: center;
+}
+
+/* ==========================================
+   Context Menu
+   ========================================== */
+
+.panel-context-menu {
+  position: fixed;
+  z-index: 1000;
+  min-width: 120px;
+  background: #2a2a2a;
+  border: 1px solid #444;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+  padding: 4px 0;
+}
+
+.context-menu-item {
+  display: block;
+  width: 100%;
+  padding: 8px 16px;
+  background: none;
+  border: none;
+  color: #ccc;
+  font-size: 13px;
+  text-align: left;
+  cursor: pointer;
+  transition: background-color 0.1s;
+}
+
+.context-menu-item:hover {
+  background: #3a3a3a;
+  color: #fff;
 }

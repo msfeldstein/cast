@@ -124,11 +124,7 @@ export class Library extends Component {
     item.innerHTML = `
       <div class="library-item-thumbnail">
         ${thumbnail ? `<img src="${thumbnail}" alt="${sketch.name}">` : '<div class="library-item-placeholder"></div>'}
-        <span class="library-item-badge type-${sketch.type}">
-          ${sketch.type.charAt(0).toUpperCase()}
-        </span>
       </div>
-      <span class="library-item-name">${sketch.name}</span>
     `;
 
     // Drag start

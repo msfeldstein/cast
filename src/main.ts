@@ -1,5 +1,12 @@
 import './index.css';
 import { App } from './App';
+import { appStateManager } from './persistence';
+
+// Check for reset parameter
+if (window.location.search.includes('reset')) {
+  appStateManager.clear();
+  window.location.href = window.location.pathname;
+}
 
 // Get the root element
 const container = document.getElementById('root');

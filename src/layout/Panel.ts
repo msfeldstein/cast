@@ -9,6 +9,8 @@ export interface PanelEvents {
   [key: string]: unknown;
   'tab:change': { tabId: string };
   'drop': { zone: DropZone };
+  'tab:drop': { index: number };
+  'tab:close': { tabId: string };
 }
 
 export interface PanelOptions {
@@ -16,6 +18,8 @@ export interface PanelOptions {
   tabs?: TabConfig[];
   activeTabId?: string;
 }
+
+export type TabValueProvider = (tabId: string) => number | null;
 
 const DRAG_THRESHOLD = 5; // pixels before drag starts
 
@@ -34,8 +38,12 @@ export class Panel extends EventEmitter<PanelEvents> {
   private activeTabId: string | null = null;
   private mountedContent: Component | null = null;
   private contentFactory: ((tabId: string) => Component) | null = null;
+  private valueProvider: TabValueProvider | null = null;
   private activeDropZone: DropZone | null = null;
   private cleanupFns: (() => void)[] = [];
+  private animationFrameId: number | null = null;
+  private tabDropIndicator: HTMLElement | null = null;
+  private tabDropIndex: number = -1;
 
   constructor(options: PanelOptions) {
     super();
@@ -61,13 +69,26 @@ export class Panel extends EventEmitter<PanelEvents> {
       titleBar.classList.add('has-tabs');
       this.renderTabsIntoTitleBar(titleBar);
     } else {
-      // Single tab or no tabs - show title
+      // Single tab or no tabs - show title with value fill
+      const tabId = this.tabs[0]?.id || this.id;
       const title = this.tabs[0]?.title || this.id;
+
+      // Add value fill element
+      const fillEl = document.createElement('div');
+      fillEl.className = 'panel-title-fill';
+      fillEl.dataset.tabId = tabId;
+      titleBar.appendChild(fillEl);
+
       const titleSpan = document.createElement('span');
       titleSpan.className = 'panel-title-text';
       titleSpan.textContent = title;
       titleBar.appendChild(titleSpan);
     }
+
+    // Create tab drop indicator
+    this.tabDropIndicator = document.createElement('div');
+    this.tabDropIndicator.className = 'tab-drop-indicator';
+    titleBar.appendChild(this.tabDropIndicator);
 
     el.appendChild(titleBar);
 
@@ -96,7 +117,18 @@ export class Panel extends EventEmitter<PanelEvents> {
       const tabEl = document.createElement('button');
       tabEl.className = 'panel-tab';
       tabEl.dataset.tabId = tab.id;
-      tabEl.textContent = tab.title;
+
+      // Add value fill element
+      const fillEl = document.createElement('div');
+      fillEl.className = 'panel-tab-fill';
+      tabEl.appendChild(fillEl);
+
+      // Add text
+      const textEl = document.createElement('span');
+      textEl.className = 'panel-tab-text';
+      textEl.textContent = tab.title;
+      tabEl.appendChild(textEl);
+
       if (tab.id === this.activeTabId) {
         tabEl.classList.add('active');
       }
@@ -117,6 +149,12 @@ export class Panel extends EventEmitter<PanelEvents> {
     // Set up drop zone interactions
     this.setupDropZones();
 
+    // Set up title bar drop handling
+    this.setupTitleBarDrop();
+
+    // Set up right-click context menu
+    this.setupContextMenu();
+
     // Listen for drag state changes
     const unsubStart = dragManager.on('drag:start', () => {
       // Don't show drop zones on the source panel
@@ -130,6 +168,7 @@ export class Panel extends EventEmitter<PanelEvents> {
     const unsubEnd = dragManager.on('drag:end', () => {
       this.element.classList.remove('drag-active');
       this.clearActiveDropZone();
+      this.hideTabDropIndicator();
     });
     this.cleanupFns.push(unsubEnd);
   }
@@ -233,6 +272,150 @@ export class Panel extends EventEmitter<PanelEvents> {
     });
   }
 
+  private setupTitleBarDrop(): void {
+    // Handle mouse move on title bar to show drop indicator
+    this.titleBar.addEventListener('mousemove', (e) => {
+      if (!dragManager.isDragActive()) return;
+
+      // Don't handle if dragging from this panel (with only one tab)
+      const dragData = dragManager.getDragData();
+      if (dragData?.sourcePanelId === this.id && this.tabs.length <= 1) return;
+
+      // Calculate drop index based on mouse position
+      const dropIndex = this.calculateTabDropIndex(e.clientX);
+      this.showTabDropIndicator(dropIndex);
+    });
+
+    this.titleBar.addEventListener('mouseleave', () => {
+      this.hideTabDropIndicator();
+    });
+
+    this.titleBar.addEventListener('mouseup', () => {
+      if (dragManager.isDragActive() && this.tabDropIndex >= 0) {
+        // Emit tab drop event
+        this.emit('tab:drop', { index: this.tabDropIndex });
+        dragManager.drop(this.id, 'center'); // Use center as fallback zone
+        this.hideTabDropIndicator();
+      }
+    });
+  }
+
+  private setupContextMenu(): void {
+    const handleContextMenu = (e: MouseEvent) => {
+      e.preventDefault();
+
+      // Determine which tab was right-clicked
+      const target = e.target as HTMLElement;
+      const tabButton = target.closest('.panel-tab') as HTMLElement | null;
+      let tabId: string;
+
+      if (tabButton) {
+        tabId = tabButton.dataset.tabId || this.tabs[0]?.id || this.id;
+      } else {
+        // Right-clicked on single-tab title bar
+        tabId = this.tabs[0]?.id || this.id;
+      }
+
+      // Create and show context menu
+      this.showContextMenu(e.clientX, e.clientY, tabId);
+    };
+
+    this.titleBar.addEventListener('contextmenu', handleContextMenu);
+    this.cleanupFns.push(() => {
+      this.titleBar.removeEventListener('contextmenu', handleContextMenu);
+    });
+  }
+
+  private showContextMenu(x: number, y: number, tabId: string): void {
+    // Remove any existing context menu
+    const existing = document.querySelector('.panel-context-menu');
+    existing?.remove();
+
+    // Create context menu
+    const menu = document.createElement('div');
+    menu.className = 'panel-context-menu';
+    menu.style.left = `${x}px`;
+    menu.style.top = `${y}px`;
+
+    const closeItem = document.createElement('button');
+    closeItem.className = 'context-menu-item';
+    closeItem.textContent = 'Close';
+    closeItem.addEventListener('click', () => {
+      this.emit('tab:close', { tabId });
+      menu.remove();
+    });
+
+    menu.appendChild(closeItem);
+    document.body.appendChild(menu);
+
+    // Close menu when clicking elsewhere
+    const closeMenu = (e: MouseEvent) => {
+      if (!menu.contains(e.target as Node)) {
+        menu.remove();
+        document.removeEventListener('mousedown', closeMenu);
+      }
+    };
+    // Use setTimeout to avoid immediate closure from the contextmenu event
+    setTimeout(() => {
+      document.addEventListener('mousedown', closeMenu);
+    }, 0);
+  }
+
+  private calculateTabDropIndex(mouseX: number): number {
+    const tabs = this.titleBar.querySelectorAll('.panel-tab');
+
+    if (tabs.length === 0) {
+      // No tabs, drop at index 0
+      return 0;
+    }
+
+    // Check each tab to find where to insert
+    for (let i = 0; i < tabs.length; i++) {
+      const tab = tabs[i] as HTMLElement;
+      const rect = tab.getBoundingClientRect();
+      const midpoint = rect.left + rect.width / 2;
+
+      if (mouseX < midpoint) {
+        return i;
+      }
+    }
+
+    // Mouse is after all tabs
+    return tabs.length;
+  }
+
+  private showTabDropIndicator(index: number): void {
+    if (!this.tabDropIndicator) return;
+
+    this.tabDropIndex = index;
+    this.tabDropIndicator.classList.add('visible');
+
+    const tabs = this.titleBar.querySelectorAll('.panel-tab');
+
+    if (tabs.length === 0) {
+      // Position at start of title bar
+      this.tabDropIndicator.style.left = '0px';
+    } else if (index >= tabs.length) {
+      // Position after last tab
+      const lastTab = tabs[tabs.length - 1] as HTMLElement;
+      const rect = lastTab.getBoundingClientRect();
+      const titleBarRect = this.titleBar.getBoundingClientRect();
+      this.tabDropIndicator.style.left = `${rect.right - titleBarRect.left}px`;
+    } else {
+      // Position before the tab at this index
+      const tab = tabs[index] as HTMLElement;
+      const rect = tab.getBoundingClientRect();
+      const titleBarRect = this.titleBar.getBoundingClientRect();
+      this.tabDropIndicator.style.left = `${rect.left - titleBarRect.left}px`;
+    }
+  }
+
+  private hideTabDropIndicator(): void {
+    if (!this.tabDropIndicator) return;
+    this.tabDropIndex = -1;
+    this.tabDropIndicator.classList.remove('visible');
+  }
+
   private setActiveDropZone(zone: DropZone): void {
     this.clearActiveDropZone();
     this.activeDropZone = zone;
@@ -266,12 +449,25 @@ export class Panel extends EventEmitter<PanelEvents> {
       this.titleBar.classList.add('has-tabs');
       this.renderTabsIntoTitleBar(this.titleBar);
     } else {
+      const tabId = tabs[0]?.id || this.id;
       const title = tabs[0]?.title || this.id;
+
+      // Add value fill element
+      const fillEl = document.createElement('div');
+      fillEl.className = 'panel-title-fill';
+      fillEl.dataset.tabId = tabId;
+      this.titleBar.appendChild(fillEl);
+
       const titleSpan = document.createElement('span');
       titleSpan.className = 'panel-title-text';
       titleSpan.textContent = title;
       this.titleBar.appendChild(titleSpan);
     }
+
+    // Re-create tab drop indicator
+    this.tabDropIndicator = document.createElement('div');
+    this.tabDropIndicator.className = 'tab-drop-indicator';
+    this.titleBar.appendChild(this.tabDropIndicator);
 
     // Re-mount content if we have a factory
     if (this.contentFactory && this.activeTabId) {
@@ -287,6 +483,64 @@ export class Panel extends EventEmitter<PanelEvents> {
     // Mount initial content if we have an active tab
     if (this.activeTabId) {
       this.mountContent(this.activeTabId);
+    }
+  }
+
+  /**
+   * Set a value provider for tabs (for showing signal values in tab backgrounds).
+   */
+  setValueProvider(provider: TabValueProvider): void {
+    this.valueProvider = provider;
+    this.startValueUpdates();
+  }
+
+  private startValueUpdates(): void {
+    if (this.animationFrameId !== null) return;
+
+    const update = () => {
+      this.updateTabValues();
+      this.animationFrameId = requestAnimationFrame(update);
+    };
+    this.animationFrameId = requestAnimationFrame(update);
+  }
+
+  private stopValueUpdates(): void {
+    if (this.animationFrameId !== null) {
+      cancelAnimationFrame(this.animationFrameId);
+      this.animationFrameId = null;
+    }
+  }
+
+  private updateTabValues(): void {
+    if (!this.valueProvider) return;
+
+    // Update tab fills
+    const tabFills = this.titleBar.querySelectorAll('.panel-tab-fill');
+    tabFills.forEach((fill) => {
+      const tabEl = fill.parentElement as HTMLElement;
+      const tabId = tabEl?.dataset.tabId;
+      if (tabId) {
+        const value = this.valueProvider!(tabId);
+        if (value !== null) {
+          (fill as HTMLElement).style.width = `${value * 100}%`;
+        } else {
+          (fill as HTMLElement).style.width = '0%';
+        }
+      }
+    });
+
+    // Update single-tab title fill
+    const titleFill = this.titleBar.querySelector('.panel-title-fill') as HTMLElement;
+    if (titleFill) {
+      const tabId = titleFill.dataset.tabId;
+      if (tabId) {
+        const value = this.valueProvider(tabId);
+        if (value !== null) {
+          titleFill.style.width = `${value * 100}%`;
+        } else {
+          titleFill.style.width = '0%';
+        }
+      }
     }
   }
 
@@ -352,6 +606,7 @@ export class Panel extends EventEmitter<PanelEvents> {
   }
 
   dispose(): void {
+    this.stopValueUpdates();
     this.unmountContent();
     for (const cleanup of this.cleanupFns) {
       cleanup();

@@ -8,7 +8,7 @@
 import { SignalType, LFOConfig, MicrophoneConfig, BeatConfig, MIDIConfig, GamepadConfig } from '../signals';
 
 // Version for schema migrations
-export const SCHEMA_VERSION = 1;
+export const SCHEMA_VERSION = 2;
 
 // Serializable signal state
 export interface PersistedSignal {
@@ -20,11 +20,35 @@ export interface PersistedSignal {
   isLearned?: boolean;
 }
 
-// Serializable binding
+// Serializable binding (includes optional effectId)
 export interface PersistedBinding {
   layerId: string;
   controlName: string;
   signalId: string;
+  effectId?: string;
+}
+
+// Serializable control value (name -> value mapping)
+export type PersistedControlValue = number | string | boolean;
+export type PersistedControls = Record<string, PersistedControlValue>;
+
+// Serializable effect state
+export interface PersistedEffect {
+  factoryId: string;  // The effect factory ID (e.g., 'zoom-blur')
+  instanceId: string; // Unique instance ID
+  enabled: boolean;
+  controls: PersistedControls;
+}
+
+// Serializable layer state
+export interface PersistedLayer {
+  id: string;
+  sketchId: string | null;    // The sketch factory ID, or null if no sketch
+  sketchControls: PersistedControls;  // Sketch control values
+  effects: PersistedEffect[];
+  opacity: number;
+  blendMode: string;
+  visible: boolean;
 }
 
 // Simple layout config (legacy - used by old PanelManager)
@@ -87,6 +111,7 @@ export interface PersistedState {
   version: number;
   signals: PersistedSignal[];
   bindings: PersistedBinding[];
+  layers: PersistedLayer[];
   layout: PersistedLayout | null;
   /** Legacy simple layout format */
   simpleLayout?: SimpleLayoutConfig | null;
@@ -99,5 +124,6 @@ export const DEFAULT_STATE: PersistedState = {
   version: SCHEMA_VERSION,
   signals: [],
   bindings: [],
+  layers: [],
   layout: null,
 };
