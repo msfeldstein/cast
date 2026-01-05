@@ -131,12 +131,12 @@ class CloudsSketch implements Sketch {
   type: 'shader' = 'shader';
 
   controls: ControlDefinition[] = [
-    { name: 'coverage', type: 'float', label: 'Coverage', defaultValue: 0.5, min: 0.0, max: 1.0, step: 0.01 },
-    { name: 'softness', type: 'float', label: 'Softness', defaultValue: 0.3, min: 0.01, max: 1.0, step: 0.01 },
-    { name: 'speed', type: 'float', label: 'Speed', defaultValue: 0.3, min: 0.0, max: 2.0, step: 0.05 },
-    { name: 'scale', type: 'float', label: 'Scale', defaultValue: 3.0, min: 0.5, max: 10.0, step: 0.1 },
-    { name: 'layers', type: 'float', label: 'Detail', defaultValue: 0.5, min: 0.0, max: 1.0, step: 0.1 },
-    { name: 'brightness', type: 'float', label: 'Brightness', defaultValue: 1.0, min: 0.5, max: 1.5, step: 0.05 },
+    { name: 'coverage', type: 'float', label: 'Coverage', defaultValue: 0.5, min: 0.0, max: 1.0 },
+    { name: 'softness', type: 'float', label: 'Softness', defaultValue: 0.3, min: 0.01, max: 1.0 },
+    { name: 'speed', type: 'float', label: 'Speed', defaultValue: 0.3, min: 0.0, max: 2.0 },
+    { name: 'scale', type: 'float', label: 'Scale', defaultValue: 3.0, min: 0.5, max: 10.0 },
+    { name: 'layers', type: 'float', label: 'Detail', defaultValue: 0.5, min: 0.0, max: 1.0 },
+    { name: 'brightness', type: 'float', label: 'Brightness', defaultValue: 1.0, min: 0.5, max: 1.5 },
     { name: 'skyColor', type: 'color', label: 'Sky', defaultValue: '#4a90d9' },
     { name: 'cloudColor', type: 'color', label: 'Clouds', defaultValue: '#ffffff' },
   ];

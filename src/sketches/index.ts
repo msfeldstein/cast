@@ -10,6 +10,9 @@ import { voronoiFactory } from './shaders/voronoi';
 import { kaleidoscopeFactory } from './shaders/kaleidoscope';
 import { tunnelFactory } from './shaders/tunnel';
 import { waveformFactory } from './shaders/waveform';
+import { fractalZoomFactory } from './shaders/fractalZoom';
+import { concentricArcsFactory } from './shaders/concentricArcs';
+import { simpleShapeFactory } from './shaders/simpleShape';
 
 // All available sketches
 export const sketches: SketchFactory[] = [
@@ -24,6 +27,9 @@ export const sketches: SketchFactory[] = [
   kaleidoscopeFactory,
   tunnelFactory,
   waveformFactory,
+  fractalZoomFactory,
+  concentricArcsFactory,
+  simpleShapeFactory,
 ];
 
 export {
@@ -38,4 +44,7 @@ export {
   kaleidoscopeFactory,
   tunnelFactory,
   waveformFactory,
+  fractalZoomFactory,
+  concentricArcsFactory,
+  simpleShapeFactory,
 };

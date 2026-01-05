@@ -1,0 +1,206 @@
+.signal-pane {
+  background: #1e1e1e;
+  padding: 6px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  overflow-y: auto;
+}
+
+.signal-pane::-webkit-scrollbar {
+  width: 6px;
+}
+
+.signal-pane::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.signal-pane::-webkit-scrollbar-thumb {
+  background: #444;
+}
+
+.signal-pane::-webkit-scrollbar-thumb:hover {
+  background: #555;
+}
+
+.signal-pane-error {
+  color: #e74c3c;
+  padding: 16px;
+  text-align: center;
+}
+
+.signal-pane-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.signal-pane-value-bar {
+  flex: 1;
+  height: 8px;
+  background: #2a2a2a;
+  overflow: hidden;
+}
+
+.signal-pane-value-fill {
+  height: 100%;
+  background: linear-gradient(to right, #888, #666);
+  transition: width 0.05s ease-out;
+}
+
+.signal-pane-binding-count {
+  font-size: 10px;
+  color: #9b59b6;
+  white-space: nowrap;
+}
+
+.signal-pane-config {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+/* Config row styles (shared with SignalsPanel) */
+.signal-pane .config-row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  height: 16px;
+}
+
+.signal-pane .config-row label {
+  font-size: 10px;
+  color: #aaa;
+  min-width: 60px;
+}
+
+.signal-pane .config-row select {
+  flex: 1;
+  background: #333;
+  color: #e0e0e0;
+  border: 1px solid #444;
+  padding: 0 6px;
+  height: 16px;
+  font-size: 10px;
+  cursor: pointer;
+}
+
+.signal-pane .config-row select:hover {
+  background: #3a3a3a;
+}
+
+.signal-pane .config-row.checkbox label {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  cursor: pointer;
+  min-width: auto;
+  font-size: 10px;
+}
+
+.signal-pane .config-row.checkbox input {
+  cursor: pointer;
+  width: 10px;
+  height: 10px;
+}
+
+/* MIDI/Gamepad learn styles */
+.signal-pane .midi-learn-container,
+.signal-pane .gamepad-learn-container {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 6px;
+  background: #2a2a2a;
+}
+
+.signal-pane .midi-learn-message,
+.signal-pane .gamepad-learn-message {
+  font-size: 10px;
+  color: #aaa;
+  text-align: center;
+  animation: pulse 1.5s infinite;
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.5; }
+}
+
+.signal-pane .midi-learn-btn,
+.signal-pane .gamepad-learn-btn {
+  background: #3a3a3a;
+  color: #e0e0e0;
+  border: 1px solid #555;
+  padding: 4px 8px;
+  height: 16px;
+  font-size: 10px;
+  cursor: pointer;
+}
+
+.signal-pane .midi-learn-btn:hover,
+.signal-pane .gamepad-learn-btn:hover {
+  background: #4a4a4a;
+}
+
+.signal-pane .midi-learn-hint,
+.signal-pane .gamepad-learn-hint {
+  font-size: 10px;
+  color: #666;
+  text-align: center;
+}
+
+.signal-pane .midi-cancel-btn,
+.signal-pane .gamepad-cancel-btn {
+  background: #333;
+  color: #aaa;
+  border: 1px solid #444;
+  padding: 2px 8px;
+  height: 16px;
+  font-size: 10px;
+  cursor: pointer;
+}
+
+.signal-pane .midi-cancel-btn:hover,
+.signal-pane .gamepad-cancel-btn:hover {
+  background: #3a3a3a;
+  color: #e0e0e0;
+}
+
+.signal-pane .midi-learned-info,
+.signal-pane .gamepad-learned-info {
+  display: flex;
+  gap: 8px;
+  padding: 4px 6px;
+  background: #2a2a2a;
+  font-size: 10px;
+}
+
+.signal-pane .midi-learned-label,
+.signal-pane .gamepad-learned-label {
+  color: #e0e0e0;
+  font-weight: 500;
+}
+
+.signal-pane .midi-learned-channel,
+.signal-pane .gamepad-learned-device {
+  color: #888;
+}
+
+.signal-pane .midi-relearn-btn,
+.signal-pane .gamepad-relearn-btn {
+  background: #333;
+  color: #aaa;
+  border: 1px solid #444;
+  padding: 2px 8px;
+  height: 16px;
+  font-size: 10px;
+  cursor: pointer;
+  margin-top: 2px;
+}
+
+.signal-pane .midi-relearn-btn:hover,
+.signal-pane .gamepad-relearn-btn:hover {
+  background: #3a3a3a;
+  color: #e0e0e0;
+}

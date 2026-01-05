@@ -7,9 +7,9 @@ class CubesSketch implements Sketch {
   type: 'sketch' = 'sketch';
 
   controls: ControlDefinition[] = [
-    { name: 'rotationSpeed', type: 'float', label: 'Rotation Speed', defaultValue: 1.0, min: 0.1, max: 5.0, step: 0.1 },
+    { name: 'rotationSpeed', type: 'float', label: 'Rotation Speed', defaultValue: 1.0, min: 0.1, max: 5.0 },
     { name: 'cubeCount', type: 'integer', label: 'Cube Count', defaultValue: 5, min: 1, max: 20 },
-    { name: 'cubeSize', type: 'float', label: 'Cube Size', defaultValue: 1.0, min: 0.2, max: 3.0, step: 0.1 },
+    { name: 'cubeSize', type: 'float', label: 'Cube Size', defaultValue: 1.0, min: 0.2, max: 3.0 },
     { name: 'randomize', type: 'trigger', label: 'Randomize Colors' },
   ];
 

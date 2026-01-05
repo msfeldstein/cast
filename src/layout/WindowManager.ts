@@ -16,6 +16,8 @@ import {
   findPanelByTabId,
   addPanel,
   insertTabAtIndex,
+  createPanelNode,
+  createSplitNode,
 } from './types';
 
 export interface WindowManagerEvents {
@@ -275,12 +277,7 @@ export class WindowManager extends EventEmitter<WindowManagerEvents> {
     this.layout = newLayout;
 
     // Create a new panel for the dropped tab
-    const newPanel: PanelNode = {
-      type: 'panel',
-      id: `node-${Date.now()}`,
-      tabs: [{ id: tabId, title: tabTitle }],
-      activeTabId: tabId,
-    };
+    const newPanel = createPanelNode([{ id: tabId, title: tabTitle }], tabId);
 
     // Insert the new panel between first and second by wrapping second in a new split
     // The new panel goes before the second child (in the middle of the divider)
@@ -297,14 +294,12 @@ export class WindowManager extends EventEmitter<WindowManagerEvents> {
   private insertPanelAtDivider(node: SplitNode, newPanel: PanelNode): void {
     // Wrap the second child in a new split with the new panel
     // This inserts the new panel between first and second
-    const newSplit: SplitNode = {
-      type: 'split',
-      id: `node-${Date.now() + 1}`,
-      direction: node.direction,
-      ratio: 0.5,
-      first: newPanel,
-      second: node.second,
-    };
+    const newSplit = createSplitNode(
+      node.direction,
+      newPanel,
+      node.second,
+      0.5
+    );
 
     // Update node's second to be the new split
     node.second = newSplit;

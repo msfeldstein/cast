@@ -251,8 +251,8 @@ export function splitPanel(
     return root;
   }
 
-  // Check if first or second is the target
-  if (root.first.id === targetPanelId) {
+  // Check if first or second is the target (only for panels, not splits)
+  if (root.first.type === 'panel' && root.first.id === targetPanelId) {
     const split = createSplitNode(
       direction,
       isFirst ? newNode : root.first,
@@ -263,7 +263,7 @@ export function splitPanel(
     return root;
   }
 
-  if (root.second.id === targetPanelId) {
+  if (root.second.type === 'panel' && root.second.id === targetPanelId) {
     const split = createSplitNode(
       direction,
       isFirst ? newNode : root.second,
@@ -274,9 +274,13 @@ export function splitPanel(
     return root;
   }
 
-  // Recurse
-  splitPanel(root.first, targetPanelId, newNode, position);
-  splitPanel(root.second, targetPanelId, newNode, position);
+  // Recurse into children - must use return values for deeply nested panels
+  if (root.first.type === 'split') {
+    root.first = splitPanel(root.first, targetPanelId, newNode, position);
+  }
+  if (root.second.type === 'split') {
+    root.second = splitPanel(root.second, targetPanelId, newNode, position);
+  }
 
   return root;
 }

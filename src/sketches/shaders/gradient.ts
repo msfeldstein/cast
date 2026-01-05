@@ -39,7 +39,7 @@ class GradientSketch implements Sketch {
   type: 'shader' = 'shader';
 
   controls: ControlDefinition[] = [
-    { name: 'speed', type: 'float', label: 'Speed', defaultValue: 1.0, min: 0.0, max: 5.0, step: 0.1 },
+    { name: 'speed', type: 'float', label: 'Speed', defaultValue: 1.0, min: 0.0, max: 5.0 },
     { name: 'saturation', type: 'float', label: 'Saturation', defaultValue: 0.8, min: 0.0, max: 1.0 },
   ];
 

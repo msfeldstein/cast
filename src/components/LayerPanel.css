@@ -75,11 +75,13 @@
   justify-content: center;
   cursor: pointer;
   flex-shrink: 0;
-  width: 24px;
-  height: 24px;
+  width: 16px;
+  height: 16px;
   background: #2a2a2a;
   border: 1px solid #444;
+  border-right: none;
   position: relative;
+  box-sizing: border-box;
 }
 
 .layer-visibility:hover {
@@ -99,9 +101,9 @@
 /* Eye icon */
 .layer-visibility::before {
   content: '';
-  width: 14px;
-  height: 8px;
-  border: 1.5px solid #555;
+  width: 10px;
+  height: 6px;
+  border: 1px solid #555;
   border-radius: 50%;
   position: relative;
   pointer-events: none;
@@ -109,8 +111,8 @@
 
 .layer-visibility::after {
   content: '';
-  width: 4px;
-  height: 4px;
+  width: 3px;
+  height: 3px;
   background: #555;
   border-radius: 50%;
   position: absolute;
@@ -124,8 +126,8 @@
 
 .layer-visibility:has(input:not(:checked))::after {
   background: #444;
-  width: 16px;
-  height: 1.5px;
+  width: 12px;
+  height: 1px;
   border-radius: 0;
   transform: rotate(-45deg);
 }
@@ -156,20 +158,23 @@
 .blend-select {
   flex-shrink: 0;
   position: relative;
-  height: 24px;
+  height: 16px;
 }
 
 .blend-select select {
-  height: 24px;
+  height: 16px;
   background: #2a2a2a;
   color: #aaa;
   border: 1px solid #444;
-  padding: 0 24px 0 8px;
-  font-size: 11px;
+  border-left: none;
+  border-right: none;
+  padding: 0 18px 0 6px;
+  font-size: 10px;
   cursor: pointer;
   appearance: none;
   -webkit-appearance: none;
   -moz-appearance: none;
+  box-sizing: border-box;
 }
 
 .blend-select::after {
@@ -200,20 +205,8 @@
   min-width: 0;
 }
 
-.layer-controls-row .opacity-slider-container .slider {
-  height: 24px;
-  min-height: 24px;
-}
-
 .layer-controls-row .opacity-slider-container .slider-label {
   display: none;
-}
-
-.layer-controls-row .opacity-slider-container .slider-value {
-  font-size: 11px;
-  top: 50%;
-  bottom: auto;
-  transform: translateY(-50%);
 }
 
 /* Sketch Controls */
@@ -226,10 +219,10 @@
 .sketch-controls-header {
   display: flex;
   align-items: center;
-  gap: 6px;
-  height: 24px;
-  padding: 0 8px;
-  font-size: 11px;
+  gap: 4px;
+  height: 16px;
+  padding: 0 6px;
+  font-size: 10px;
   color: #888;
   text-transform: uppercase;
   letter-spacing: 0.5px;
@@ -270,44 +263,44 @@
 .color-control {
   display: flex;
   align-items: center;
-  gap: 8px;
-  height: 36px;
-  font-size: 12px;
+  justify-content: space-between;
+  gap: 6px;
+  height: 16px;
+  font-size: 10px;
   background: #2a2a2a;
-  padding: 0 8px;
+  padding: 0 6px;
 }
 
 .color-control label {
-  color: #aaa;
-  flex: 1;
+  color: rgba(255, 255, 255, 0.7);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
 }
 
 .color-control input[type="color"] {
-  width: 40px;
-  height: 28px;
+  width: 24px;
+  height: 12px;
   padding: 0;
   border: 1px solid #444;
-  
   background: transparent;
   cursor: pointer;
 }
 
 .color-control input[type="color"]::-webkit-color-swatch-wrapper {
-  padding: 2px;
+  padding: 1px;
 }
 
 .color-control input[type="color"]::-webkit-color-swatch {
   border: none;
-  
 }
 
 .trigger-button {
   background: #3a3a3a;
   color: #e0e0e0;
   border: none;
-  height: 36px;
-  padding: 0 16px;
-  font-size: 12px;
+  height: 16px;
+  padding: 0 6px;
+  font-size: 10px;
   cursor: pointer;
   transition: background 0.1s, transform 0.05s;
   width: 100%;
@@ -333,25 +326,25 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  height: 28px;
-  padding: 0 8px;
+  height: 16px;
+  padding: 0 6px;
   background: #1a1a1a;
 }
 
 .effects-title {
-  font-size: 11px;
+  font-size: 10px;
   color: #888;
   text-transform: uppercase;
   letter-spacing: 0.5px;
 }
 
 .add-effect-btn {
-  width: 20px;
-  height: 20px;
+  width: 14px;
+  height: 14px;
   background: #3a3a3a;
   border: 1px solid #555;
   color: #aaa;
-  font-size: 16px;
+  font-size: 12px;
   line-height: 1;
   cursor: pointer;
   display: flex;
@@ -396,10 +389,10 @@
 .effect-header {
   display: flex;
   align-items: center;
-  gap: 6px;
-  height: 24px;
-  padding: 0 8px;
-  font-size: 11px;
+  gap: 4px;
+  height: 16px;
+  padding: 0 6px;
+  font-size: 10px;
   color: #888;
   cursor: pointer;
   user-select: none;
@@ -450,19 +443,19 @@
 }
 
 .effect-enable input {
-  width: 12px;
-  height: 12px;
+  width: 10px;
+  height: 10px;
   cursor: pointer;
   accent-color: #9b59b6;
 }
 
 .effect-remove {
-  width: 18px;
-  height: 18px;
+  width: 14px;
+  height: 14px;
   background: transparent;
   border: none;
   color: #666;
-  font-size: 14px;
+  font-size: 12px;
   line-height: 1;
   cursor: pointer;
   display: flex;

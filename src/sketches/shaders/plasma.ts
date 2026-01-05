@@ -62,8 +62,8 @@ class PlasmaSketch implements Sketch {
   type: 'shader' = 'shader';
 
   controls: ControlDefinition[] = [
-    { name: 'speed', type: 'float', label: 'Speed', defaultValue: 1.0, min: 0.1, max: 5.0, step: 0.1 },
-    { name: 'scale', type: 'float', label: 'Scale', defaultValue: 4.0, min: 1.0, max: 20.0, step: 0.5 },
+    { name: 'speed', type: 'float', label: 'Speed', defaultValue: 1.0, min: 0.1, max: 5.0 },
+    { name: 'scale', type: 'float', label: 'Scale', defaultValue: 4.0, min: 1.0, max: 20.0 },
     { name: 'color1', type: 'color', label: 'Color 1', defaultValue: '#1a4dcc' },
     { name: 'color2', type: 'color', label: 'Color 2', defaultValue: '#e63380' },
   ];
